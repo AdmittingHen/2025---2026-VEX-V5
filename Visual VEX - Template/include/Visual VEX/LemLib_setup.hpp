@@ -1,4 +1,4 @@
-#include "main.h" // IWYU pragma: keep
+#include "VISUAL_API.hpp" // IWYU pragma: keep
 #include "lemlib/api.hpp" // IWYU pragma: keep
 
 #pragma once
@@ -81,7 +81,7 @@ inline lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
 // create the chassis
 inline lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-// Add more ports and PIDS down here
+// Add more ports and PIDS down here...
 
 // pros::adi::DigitalOut piston('A'); // this is a true/false signal named piston on 3 wire port A
 // lemlib::PID name(1,0,2); // this is a pid callled name with p = 1 i = 0 d = 2

@@ -1,10 +1,16 @@
-#pragma once
-#include "pros/colors.hpp"
-#include "pros/screen.h" // IWYU pragma: keep
-#include <functional>
-#include <iostream> // IWYU pragma: keep
+#include "main.h" // IWYU pragma: keep
 
 namespace VIS{
+    namespace INTERFACE {
+        class NON{
+            public:
+                void set(bool value);
+                void toggle();
+                bool getState();
+
+            private:
+        };
+    }
     namespace DRIVE{
         //drive functions
         void Drive(int dist, float speed);
@@ -64,7 +70,6 @@ namespace VIS{
           void selected_auton_run();
           void auton_print();
           void autons_add(std::vector<Auton> RED, std::vector<Auton> BLUE, std::vector<Auton> SKILS);
-          void setframerate(int fps);
         };
     }  // namespace ez
 

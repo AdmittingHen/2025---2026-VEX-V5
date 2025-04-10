@@ -1,6 +1,5 @@
-// #include "Auton_manager/VISUAL_namespace.hpp"
 #include "Visual VEX/VISUAL_API.hpp" // IWYU pragma: keep
-#include "Visual VEX\Auton_manager\DriveFunctions.cpp"
+#include "Visual VEX\Auton_manager\AutonFunctions.cpp"
 #include "pros/rtos.hpp"
 
 //use DRIVE:: (the function you want to use) for driving to positions or for distances

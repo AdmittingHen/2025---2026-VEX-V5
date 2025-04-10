@@ -1,6 +1,4 @@
-#include "VISUAL_namespace.hpp"
-#include <functional>
-#include <string>
+#include "Visual VEX/VISUAL_API.hpp"
 
 using namespace VIS::S;
 

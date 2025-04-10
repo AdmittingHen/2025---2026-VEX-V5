@@ -4,7 +4,6 @@
 #include "pros/screen.h"
 #include "Visual VEX/VISUAL_API.hpp" // IWYU pragma: keep
 #include <cmath>
-#include <numbers>
 
 //sets pen color
 void pencol(pros::Color col){
