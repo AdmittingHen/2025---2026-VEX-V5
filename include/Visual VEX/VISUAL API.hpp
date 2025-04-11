@@ -1,8 +1,11 @@
+#include "lemlib/asset.hpp"
 #include "main.h" // IWYU pragma: keep
+#include <cstdio>
 
+#pragma once
 namespace VIS{
     namespace INTERFACE {
-        class NON{
+        class piston{
             public:
                 void set(bool value);
                 void toggle();
@@ -22,6 +25,7 @@ namespace VIS{
         void Drive_to_point_and_face(float X, float Y, float X2, float Y2, float DriveMaxSpeed, int TurnMaxSpeed);
         void stop();
         void stopall();
+        void runodomfile(const asset, int);
         namespace SETUP {
             void Set_timeout_mult(float newmult);
             void Set_ToPoint_timeout(int newtime);
@@ -65,10 +69,10 @@ namespace VIS{
           int auton_page_current;
           int RED_AC, BLUE_AC, SKILS_AC;
           int last_auton_page_current;
+          int SelTeam;
           AutonSelector();
           AutonSelector(std::vector<Auton> RED, std::vector<Auton> BLUE, std::vector<Auton> SKILS);
           void selected_auton_run();
-          void auton_print();
           void autons_add(std::vector<Auton> RED, std::vector<Auton> BLUE, std::vector<Auton> SKILS);
         };
     }  // namespace ez

@@ -1,5 +1,7 @@
-#include "Visual VEX/VISUAL_API.hpp"
 #include "Visual VEX\AutonCode.cpp"
+#include "Visual VEX\Auton_manager\Screen.cpp"
+#include "Visual VEX\Auton_manager\AUTONS_CLASS.cpp"
+#include "Visual VEX\Auton_manager\Selector.cpp"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
 #include <cmath>
@@ -16,7 +18,7 @@ void Setup_Autons(){
                 {"skils test 2", "This is another Skils function you probably wont ever need another of these", skils2}
         }
     );
-    auton_selector.auton_print();
+    start();
 }
 
 /**
@@ -50,11 +52,13 @@ void competition_initialize(){}
 // get a path used for pure pursuit
 // this needs to be put outside a function
 ASSET(example_txt); // '.' replaced with "_" to make c++ happy
+ASSET(RedTest1_txt); //files like this must have somthing in them, one character is enough
 
 /**
  * Runs during auto
  */
 void autonomous(){
+    chassis.setPose(0,0,0);
     auton_selector.selected_auton_run();
 }
 

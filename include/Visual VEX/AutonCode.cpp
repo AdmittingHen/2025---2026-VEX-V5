@@ -1,4 +1,3 @@
-#include "Visual VEX/VISUAL_API.hpp" // IWYU pragma: keep
 #include "Visual VEX\Auton_manager\AutonFunctions.cpp"
 #include "pros/rtos.hpp"
 
