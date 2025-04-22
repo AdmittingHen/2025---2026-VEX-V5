@@ -1,22 +1,24 @@
-#include "Visual VEX\AutonCode.cpp"
-#include "Visual VEX\Auton_manager\Screen.cpp"
-#include "Visual VEX\Auton_manager\AUTONS_CLASS.cpp"
-#include "Visual VEX\Auton_manager\Selector.cpp"
-#include "pros/motors.h"
+#include "Visual VEX/VISUAL API.hpp"
+#include "Visual VEX/LemLib_setup.hpp"
 #include "pros/rtos.hpp"
 #include <cmath>
 
+//if you came here from the auton file follow these steps
+
+//for adding an auton go to the end of the line above the team comment
+//then type comma > enter/return > {} end
+//now just follow the format of the other autons that are already there
 void Setup_Autons(){
         auton_selector.autons_add(
         {{"red team test", "This is a red team auton function", drivefunc},
               {"red team test 2", "This is another red team function", drivefunc2}
-        }, 
+        }, // ^^^ Red Team autons ^^^ (this is a team comment)
         {{"blue team test", "This is a blue team auton function", turnfunc},
                {"blue team test 2", "This is another blue team function", turnfunc2}
-        }, 
+        }, // ^^^ Blue team autons ^^^
         {{"skils test", "This is a Skils function it has no team", skils},
                 {"skils test 2", "This is another Skils function you probably wont ever need another of these", skils2}
-        }
+        } // ^^^ Skils autons ^^^
     );
     start();
 }
@@ -48,11 +50,6 @@ void disabled(){}
  * runs after initialize if the robot is connected to field control
  */
 void competition_initialize(){}
-
-// get a path used for pure pursuit
-// this needs to be put outside a function
-ASSET(example_txt); // '.' replaced with "_" to make c++ happy
-ASSET(RedTest1_txt); //files like this must have somthing in them, one character is enough
 
 /**
  * Runs during auto

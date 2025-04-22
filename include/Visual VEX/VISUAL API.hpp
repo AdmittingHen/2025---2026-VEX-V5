@@ -1,17 +1,26 @@
 #include "lemlib/asset.hpp"
+#include "lemlib/pose.hpp"
+#include "AutonFunc.hpp"
 #include "main.h" // IWYU pragma: keep
+#include "pros/colors.hpp"
 #include <cstdio>
 
 #pragma once
+
+void start();
+
 namespace VIS{
+    lemlib::Pose position();
+    int CalcTimeout(int angulardist);
+    int CalcTimeout(int angulardist, int speed);
+    int calcTimoutDrive(int Xdist, int Ydist, float speed);
+
     namespace INTERFACE {
         class piston{
             public:
                 void set(bool value);
                 void toggle();
                 bool getState();
-
-            private:
         };
     }
     namespace DRIVE{
@@ -132,27 +141,27 @@ namespace VIS{
 
             class arrow{
                 public: 
-                arrow(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffset);
-                arrow(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffset, pros::Color col);
-                void ResetWith(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffset);
-                void ResetWith(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffsete, pros::Color col);
-                void arr_point_x(int point_x);
-                void arr_point_y(int point_y);
-                void arr_tail_Dist(int tail_dist);
-                void arr_tail_openang(int Tail_yDist);
-                void arr_angleoff(int angle);
-                void arr_color(pros::Color col);
+                arrow(int pX, int pY, int px_out, int px_back, int ori);
+                arrow(int pX, int pY, int px_out, int px_back, int ori, pros::Color color);
+                void point_x(int pX);
+                void point_y(int pY);
+                void px_out_set(int px_out);
+                void px_back_set(int px_back);
+                void angle_set(int angle);
+                void color_set(pros::Color color);
                 void print();
-                bool Touching(int X, int Y, bool do_rect_check);
+                bool Touching(int x, int y);
 
                 private:
-                int pX;
-                int pY;
-                int tdist;
-                int openang;
-                int angoff;
-                pros::Color color = pros::Color::white;
+                int px;
+                int py;
+                int pxback;
+                int pxout;
+                int ori;
+                pros::Color col = pros::Color::white;
             };
         } // namespace VIS::SCREEN::DRAW
     } // namespace VIS::SCREEN
 } // namespace VIS
+
+VIS::S::AutonSelector auton_selector;

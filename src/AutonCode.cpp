@@ -1,5 +1,4 @@
-#include "Visual VEX\Auton_manager\AutonFunctions.cpp"
-#include "pros/rtos.hpp"
+#include "Visual VEX\VISUAL API.hpp"
 
 //use DRIVE:: (the function you want to use) for driving to positions or for distances
 //use DRIVE::SETUP (the function you want to use) for driving constants
@@ -22,6 +21,15 @@ void wait_msec(int msec){
     pros::delay(msec);
 }
 
+// get a path used for pure pursuit
+// this needs to be put outside a function
+ASSET(example_txt); // '.' replaced with "_" to make c++ happy
+ASSET(RedTest1_txt); //files like this must have somthing in them, one character is enough
+
+//when you add a new function you need to add it to the definition file so things are happy
+//go to (filepath) "include/Visual VEX/AutonFunc.hpp"
+//once you are there just type "void [your name here]();" take out the brackets
+//now go to (filepath) "scr/main.cpp"
 
 using namespace VIS;
 

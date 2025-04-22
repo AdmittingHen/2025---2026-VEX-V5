@@ -13,21 +13,21 @@ int TurnTimeoutMult = 3;
 
 //---general functions used for autons---
 
-lemlib::Pose position(){//gets robot odom position
+lemlib::Pose VIS::position(){//gets robot odom position
     return chassis.getPose();
 }
 
 //---timeout calculation---
 
-int CalcTimeout(int angulardist){
+int VIS::CalcTimeout(int angulardist){
     return TurnTimeout + (angulardist*TurnTimeoutMult);
 }
 
-int CalcTimeout(int angulardist, int speed){
+int VIS::CalcTimeout(int angulardist, int speed){
     return TurnTimeout + (angulardist*TurnTimeoutMult);
 }
 
-int calcTimoutDrive(int Xdist, int Ydist, float speed){
+int VIS::calcTimoutDrive(int Xdist, int Ydist, float speed){
     return ((Xdist+Ydist)/2.0)*speed*timeoutmult;
 }
 

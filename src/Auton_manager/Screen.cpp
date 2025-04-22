@@ -1,5 +1,4 @@
 #include "pros/screen.hpp"
-#include "lemlib/util.hpp"
 #include "pros/colors.hpp"
 #include "pros/screen.h"
 #include "Visual VEX/VISUAL API.hpp" // IWYU pragma: keep
@@ -257,88 +256,90 @@ bool rrect::Touching(int X, int Y){
 //arrrow class functions
 
 //constructor
-arrow::arrow(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffset){
-    pX = point_x;
-    pY = point_y;
-    tdist = Tails_Dist;
-    openang = openingAngle;
-    angoff = angleOffset-openingAngle/2;
+arrow::arrow(int pX, int pY, int px_out, int px_back, int orientation){
+    px = pX;
+    py = pY;
+    pxout = px_out;
+    pxback = px_back;
+    ori = orientation;
 }
 
-arrow::arrow(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffset, pros::Color col){
-    pX = point_x;
-    pY = point_y;
-    tdist = Tails_Dist;
-    openang = openingAngle;
-    angoff = angleOffset-openingAngle/2;
-    color = col;
+arrow::arrow(int pX, int pY, int px_out, int px_back, int orientation, pros::Color color){
+    px = pX;
+    py = pY;
+    pxout = px_out;
+    pxback = px_back;
+    ori = orientation;
+    col = color;
 }
 
-void arrow::ResetWith(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffset){
-    pX = point_x;
-    pY = point_y;
-    tdist = Tails_Dist;
-    openang = openingAngle;
-    angoff = angleOffset-openingAngle/2;
+void arrow::point_x(int pX){
+    px = pX;
 }
 
-void arrow::ResetWith(int point_x, int point_y, int Tails_Dist, int openingAngle, int angleOffset, pros::Color col){
-    pX = point_x;
-    pY = point_y;
-    tdist = Tails_Dist;
-    openang = openingAngle;
-    angoff = angleOffset-openingAngle/2;
-    color = col;
+void arrow::point_y(int pY){
+    py = pY;
 }
 
-void arrow::arr_point_x(int point_x){
-    pX = point_x;
+void arrow::px_out_set(int px_out){
+    pxout = px_out;
 }
 
-void arrow::arr_point_y(int point_y){
-    pY = point_y;
+void arrow::px_back_set(int px_back){
+    pxback = px_back;
 }
 
-void arrow::arr_tail_Dist(int tail_dist){
-    tdist = tail_dist;
+void arrow::angle_set(int orientation){//value 0 - 3 dictating the direction
+    ori = orientation;
 }
 
-void arrow::arr_tail_openang(int openingAngle){
-    openang = openingAngle;
-    angoff = angoff-openingAngle/2;
-}
-
-void arrow::arr_angleoff(int angle){
-    angoff = angle-openang/2;
-}
-
-void arrow::arr_color(pros::Color col){
-    color = col;
+void arrow::color_set(pros::Color color){
+    col = color;
 }
 
 void arrow::print(){
-    int angoff_rad = lemlib::degToRad(angoff);
-    int openang_rad = lemlib::degToRad(openang);
-    makeline(pX, pY, (cos(angoff_rad)*tdist)+pX, (sin(angoff_rad)*tdist)+pY);
-    makeline(pX, pY, (cos(angoff_rad+openang_rad)*tdist)+pX, (sin(angoff_rad+openang_rad)*tdist)+pY);
-}
+    if (ori == 0){
+        makeline(px, py, px+pxout, py+pxback);
+        makeline(px, py, px-pxout, py+pxback);
+    }
 
-bool arrow::Touching(int X, int Y, bool dont_check_rect){
-    double val = lemlib::radToDeg(atan2(X-pX, Y-pY)); // angle of touch relative to point
-    double opp = tdist/tan(lemlib::degToRad(openang/2.0)); // this is the opposite of one side mutli by 2 for full side
-    double adjacent = opp/tan(lemlib::degToRad(openang/2.0)); // this is the distance from point to end
-    double dist = sqrt(pow(abs(pX-X), 2) + pow(abs(pY-Y), 2)); // dist to touch from point
+    if (ori == 1){
+        makeline(px, py, px+pxout, py-pxback);
+        makeline(px, py, px-pxout, py-pxback);
+    }
 
-    if (!dont_check_rect){
-        return val>0+angoff && val<180+angoff && dist<tdist && sqrt(pow(adjacent-dist, 2)+pow(opp, 2))<dist;
-    } else {
-        return angoff>val && val<angoff+openang && dist<adjacent;
+    if (ori == 2){
+        makeline(px, py, px-pxback, py+pxout);
+        makeline(px, py, px-pxback, py-pxout);
+    }
+
+    if (ori == 3){
+        makeline(px, py, px+pxback, py+pxout);
+        makeline(px, py, px+pxback, py-pxout);
     }
 }
 
-//this is selector display code -- forms the selector
+bool arrow::Touching(int x, int y){
+    bool ret = false;
+    if (ori == 0){
+        ret = x>px-pxout && x<px+pxout && y>py+pxback && y<py;
+    }
 
-VIS::S::AutonSelector auton_selector;
+    if (ori == 1){
+        ret = x>px-pxout && x<px+pxout && y<py+pxback && y>py;
+    }
+
+    if (ori == 2){
+        ret = x<px && x>px-pxback && y>py-pxout && y<py+pxout;
+    }
+
+    if (ori == 3){
+        ret = x>px && x<px-pxback && y>py-pxout && y<py+pxout;
+    }
+    return ret;
+}
+
+//this is selector display code -- forms the selector
 
 int SelTeam = 0;
 
@@ -527,7 +528,7 @@ pros::touch_event_cb_fn_t onPress(int Xpos, int Ypos){
     if (RedSelBox.Touching(Xpos, Ypos) && !autoTest){SelTeam = 1; auton_selector.auton_page_current = 0;}
     if (BlueSelBox.Touching(Xpos, Ypos) && !autoTest){SelTeam = 2; auton_selector.auton_page_current = 0;}
     if (SkilsSelBox.Touching(Xpos, Ypos) && !autoTest){SelTeam = 3; auton_selector.auton_page_current = 0;}
-    if (up.Touching(Xpos, Ypos, false) && !autoTest){
+    if (up.Touching(Xpos, Ypos) && !autoTest){
         if (SelTeam == 1 && auton_selector.auton_page_current<auton_selector.RED_autons.size()){
             auton_selector.auton_page_current++;
         }
@@ -538,7 +539,7 @@ pros::touch_event_cb_fn_t onPress(int Xpos, int Ypos){
             auton_selector.auton_page_current++;
         }
     }
-    if (dn.Touching(Xpos, Ypos, false) && auton_selector.auton_page_current>0 && !autoTest){auton_selector.auton_page_current--;}
+    if (dn.Touching(Xpos, Ypos) && auton_selector.auton_page_current>0 && !autoTest){auton_selector.auton_page_current--;}
 
     if (ToNormalMode.Touching(Xpos, Ypos) && autoTest){autoTest = false;}
     if (VirtualField.Touching(Xpos, Ypos) && autoTest){
