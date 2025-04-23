@@ -3,26 +3,6 @@
 #include "pros/rtos.hpp"
 #include <cmath>
 
-//if you came here from the auton file follow these steps
-
-//for adding an auton go to the end of the line above the team comment
-//then type comma > enter/return > {} end
-//now just follow the format of the other autons that are already there
-void Setup_Autons(){
-        auton_selector.autons_add(
-        {{"red team test", "This is a red team auton function", drivefunc},
-              {"red team test 2", "This is another red team function", drivefunc2}
-        }, // ^^^ Red Team autons ^^^ (this is a team comment)
-        {{"blue team test", "This is a blue team auton function", turnfunc},
-               {"blue team test 2", "This is another blue team function", turnfunc2}
-        }, // ^^^ Blue team autons ^^^
-        {{"skils test", "This is a Skils function it has no team", skils},
-                {"skils test 2", "This is another Skils function you probably wont ever need another of these", skils2}
-        } // ^^^ Skils autons ^^^
-    );
-    start();
-}
-
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -31,7 +11,7 @@ void Setup_Autons(){
  */
 void initialize(){
     //add autons to the selector
-    Setup_Autons();
+    VIS::Setup_Autons();
 
     chassis.calibrate(); // calibrate sensors
 
@@ -56,7 +36,7 @@ void competition_initialize(){}
  */
 void autonomous(){
     chassis.setPose(0,0,0);
-    auton_selector.selected_auton_run();
+    VIS::S::run();//this runs the selected auton
 }
 
 float DriveTrain_values[4] = {6, //this is fwrd/back curve

@@ -10,6 +10,7 @@
 void start();
 
 namespace VIS{
+    void Setup_Autons();
     lemlib::Pose position();
     int CalcTimeout(int angulardist);
     int CalcTimeout(int angulardist, int speed);
@@ -60,6 +61,7 @@ namespace VIS{
     } // namespace VIS::TURN
 
     namespace S {
+        void run();
         class Auton {
             public:
              Auton();
@@ -88,6 +90,21 @@ namespace VIS{
 
     namespace SCREEN{
         namespace DRAW{
+            void makeline(int x1, int y1, int x2, int y2);
+            void makeline(int x1, int y1, int x2, int y2, pros::Color col);
+            //rect drawing functions
+            void makerect(int x1, int y1, int width, int height);
+            void makerect(int x1, int y1, int width, int height, bool fill);
+            void makerect(int x1, int y1, int width, int height, pros::Color col);
+            void makerect(int x1, int y1, int width, int height, pros::Color col, bool fill);
+            //rounded rect functions
+            void MakeRoundedRect(int x1, int y1, int width, int height, int rounding);
+            void MakeRoundedRect(int x1, int y1, int width, int height, int rounding, pros::Color col);
+            //text printing functions
+            void PRINT(const char* text, int line, pros::text_format_e_t textfmt);
+            void PRINT(const char* text, int line, pros::Color col, pros::text_format_e_t textfmt);
+            void PRINT(const char* text, int x, int y, pros::text_format_e_t textfmt);
+            void PRINT(const char* text, int x, int y, pros::Color col, pros::text_format_e_t textfmt);
             class rect{
                 public:
                 rect(int x, int y, int width, int height);
@@ -163,5 +180,3 @@ namespace VIS{
         } // namespace VIS::SCREEN::DRAW
     } // namespace VIS::SCREEN
 } // namespace VIS
-
-VIS::S::AutonSelector auton_selector;
