@@ -1,4 +1,5 @@
 #include "Visual VEX/VISUAL API.hpp"
+#include "Visual VEX/Screen.hpp"
 #include "pros/rtos.hpp"
 #include <cmath>
 

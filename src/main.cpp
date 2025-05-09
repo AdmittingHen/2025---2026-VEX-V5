@@ -1,4 +1,3 @@
-#include "Visual VEX/VISUAL API.hpp"
 #include "Visual VEX/LemLib_setup.hpp"
 #include "pros/rtos.hpp"
 #include <cmath>

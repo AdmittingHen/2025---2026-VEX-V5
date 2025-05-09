@@ -11,7 +11,7 @@
 //IF YOU HAVE A QUESTION GO AND ASK ME, IF I'M NOT THERE CALL ME, IF I DON'T ANSWER, MESSAGE ME. Thanks\\
 //-----------------------------------------------------------------------------------------------------\\
 
-//add your own functions here, you can use these is autons
+//add your own functions here, you can use these in autons
 
 void wait(float Seconds){
     pros::delay(Seconds/1000);

@@ -1,17 +1,14 @@
+#include "Visual VEX\Screen.hpp" // IWYU pragma: keep
 #include "pros/screen.hpp"
-#include "pros/colors.hpp"
-#include "pros/screen.h"
-#include "Visual VEX/VISUAL API.hpp" // IWYU pragma: keep
-#include <cmath>
 
 //sets pen color
 void pencol(pros::Color col){
     pros::screen::set_pen(col);
 }
 
-using namespace VIS::SCREEN::DRAW;
-
-//line functions
+namespace VIS::SCREEN::DRAW{
+    
+    //line functions
 void makeline(int x1, int y1, int x2, int y2){
     pros::screen::draw_line(x1, y1, x2, y2);
 }
@@ -299,23 +296,23 @@ void arrow::color_set(pros::Color color){
 
 void arrow::print(){
     if (ori == 0){
-        makeline(px, py, px+pxout, py+pxback);
-        makeline(px, py, px-pxout, py+pxback);
+        pros::screen::draw_line(px, py, px+pxout, py+pxback);
+        pros::screen::draw_line(px, py, px-pxout, py+pxback);
     }
 
     if (ori == 1){
-        makeline(px, py, px+pxout, py-pxback);
-        makeline(px, py, px-pxout, py-pxback);
+        pros::screen::draw_line(px, py, px+pxout, py-pxback);
+        pros::screen::draw_line(px, py, px-pxout, py-pxback);
     }
 
     if (ori == 2){
-        makeline(px, py, px-pxback, py+pxout);
-        makeline(px, py, px-pxback, py-pxout);
+        pros::screen::draw_line(px, py, px-pxback, py+pxout);
+        pros::screen::draw_line(px, py, px-pxback, py-pxout);
     }
 
     if (ori == 3){
-        makeline(px, py, px+pxback, py+pxout);
-        makeline(px, py, px+pxback, py-pxout);
+        pros::screen::draw_line(px, py, px+pxback, py+pxout);
+        pros::screen::draw_line(px, py, px+pxback, py-pxout);
     }
 }
 
@@ -337,4 +334,5 @@ bool arrow::Touching(int x, int y){
         ret = x>px && x<px-pxback && y>py-pxout && y<py+pxout;
     }
     return ret;
+}
 }
