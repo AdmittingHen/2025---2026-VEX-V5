@@ -14,15 +14,7 @@ namespace VIS{
     int CalcTimeout(int angulardist);
     int CalcTimeout(int angulardist, int speed);
     int calcTimoutDrive(int Xdist, int Ydist, float speed);
-
-    namespace INTERFACE {
-        class piston{
-            public:
-                void set(bool value);
-                void toggle();
-                bool getState();
-        };
-    }
+    
     namespace DRIVE{
         //drive functions
         void Drive(int dist, float speed);
@@ -78,7 +70,6 @@ namespace VIS{
           std::vector<Auton> SKILS_auton;
           int auton_page_current;
           int RED_AC, BLUE_AC, SKILS_AC;
-          int last_auton_page_current;
           int SelTeam;
           AutonSelector();
           AutonSelector(std::vector<Auton> RED, std::vector<Auton> BLUE, std::vector<Auton> SKILS);

@@ -8,7 +8,7 @@
  */
 
 #if 1 /*Set it to "1" to enable content*/
-
+//chagned 317 and 224
 #ifndef LV_CONF_H
 #define LV_CONF_H
 /* clang-format off */
@@ -121,7 +121,7 @@ typedef int16_t lv_coord_t;
  * Can be changed in the Input device driver (`lv_indev_drv_t`)*/
 
 /* Input device read period in milliseconds */
-#define LV_INDEV_DEF_READ_PERIOD          50
+#define LV_INDEV_DEF_READ_PERIOD          5
 
 /* Drag threshold in pixels */
 #define LV_INDEV_DEF_DRAG_LIMIT           10
@@ -221,7 +221,7 @@ typedef void * lv_fs_drv_user_data_t;
 #define LV_USE_USER_DATA        1
 
 /*1: Show CPU usage and FPS count in the right bottom corner*/
-#define LV_USE_PERF_MONITOR     0
+#define LV_USE_PERF_MONITOR     1 //changed
 
 /*1: Use the functions and types from the older API if possible */
 #define LV_USE_API_EXTENSION_V6  1
@@ -314,7 +314,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
  *===============*/
 
 /*1: Enable the log module*/
-#define LV_USE_LOG      0
+#define LV_USE_LOG      1 //changed
 #if LV_USE_LOG
 /* How important log should be added:
  * LV_LOG_LEVEL_TRACE       A lot of logs to give detailed information

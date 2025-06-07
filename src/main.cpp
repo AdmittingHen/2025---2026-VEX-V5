@@ -1,6 +1,11 @@
 #include "Visual VEX/LemLib_setup.hpp"
+#include "pros/misc.hpp"
 #include "pros/rtos.hpp"
+#include "pros/vision.h"
+#include "pros/vision.hpp"
 #include <cmath>
+
+#include <stdlib.h>
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -8,9 +13,12 @@
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
 void initialize(){
     //add autons to the selector
     VIS::Setup_Autons();
+
+    pros::Vision eye(1, pros::E_VISION_ZERO_TOPLEFT);
 
     chassis.calibrate(); // calibrate sensors
 
@@ -67,6 +75,11 @@ void opcontrol(){
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
     //runs the driver loop
     while (true){
+
+        if (!pros::competition::is_connected() && (controller.get_digital(DIGITAL_A) && controller.get_digital(DIGITAL_B))){
+            autonomous();// if no field is conected and buttons A and B are pressed, the bot will run the selected auton
+        }
+
 		updateDrive(); //this function updates the drivetrain with new contoller inputs
         
         // delay to save resources

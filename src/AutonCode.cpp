@@ -14,7 +14,7 @@
 //add your own functions here, you can use these in autons
 
 void wait(float Seconds){
-    pros::delay(Seconds/1000);
+    pros::delay(Seconds*1000);
 }
 
 void wait_msec(int msec){

@@ -1,7 +1,20 @@
 #include "Visual VEX/VISUAL API.hpp"
-#include "Visual VEX/Screen.hpp"
+#include "liblvgl/core/lv_disp.h"
+#include "liblvgl/core/lv_event.h"
+#include "liblvgl/core/lv_obj.h"
+#include "liblvgl/core/lv_obj_pos.h"
+#include "liblvgl/core/lv_obj_style.h"
+#include "liblvgl/core/lv_refr.h"
+#include "liblvgl/hal/lv_hal_tick.h"
+#include "liblvgl/misc/lv_area.h"
+#include "liblvgl/misc/lv_color.h"
+#include "liblvgl/widgets/lv_btnmatrix.h"
+#include "liblvgl/widgets/lv_label.h"
 #include "pros/rtos.hpp"
 #include <cmath>
+#include <cstdio>
+#include <optional>
+#include <vector>
 
 VIS::S::AutonSelector auton_selector;
 
@@ -12,8 +25,10 @@ VIS::S::AutonSelector auton_selector;
 //now just follow the format of the other autons that are already there
 void VIS::Setup_Autons(){
     auton_selector.autons_add(
-    {{"red team test", "This is a red team auton function", drivefunc},
-          {"red team test 2", "This is another red team function", drivefunc2}
+    {{"red team test 1", "This is a red team auton function", drivefunc},
+          {"red team test 2", "This is another red team function", drivefunc2},
+          {"red team  test 3", "This is another test for red", drivefunc},
+          {"red team test 4", "This is another test for red team", drivefunc}
     }, // ^^^ Red Team autons ^^^ (this is a team comment)
     {{"blue team test", "This is a blue team auton function", turnfunc},
            {"blue team test 2", "This is another blue team function", turnfunc2}
@@ -21,252 +36,207 @@ void VIS::Setup_Autons(){
     {{"skils test", "This is a Skils function it has no team", skils},
             {"skils test 2", "This is another Skils function you probably wont ever need another of these", skils2}
     } // ^^^ Skils autons ^^^
-);
+    );
 start();
 }
 
 
 //this is selector display code -- forms the selector
 
-int SelTeam = 0;
+//team plate def
+lv_obj_t *btnmtx = lv_btnmatrix_create(lv_scr_act());
+static const char *buttonmtxlayout[] = {"Red Team", "\n", "Blue Team", "\n", "Skils Team", ""};
+    lv_obj_t* rselbox = lv_obj_create(btnmtx);
+    lv_obj_t* bselbox = lv_obj_create(btnmtx);
+    lv_obj_t* sselbox = lv_obj_create(btnmtx);
 
-pros::Color GTC(int team){
-    if (team == 3) {
-        return pros::Color::green;// Skils color
+//team auton sel def
+lv_obj_t *AutoDesc = lv_label_create(lv_scr_act());
+
+//auton selection buttons
+lv_obj_t *upbtn = lv_btn_create(lv_scr_act());
+    lv_obj_t *nextautoup = lv_label_create(upbtn);
+lv_obj_t *dnbtn = lv_btn_create(lv_scr_act());
+    lv_obj_t *nextautodn = lv_label_create(dnbtn);
+
+    //colors made by me
+    lv_color_t Grey = lv_color_make(70, 70, 70);
+    lv_color_t LightGrey = lv_color_make(110, 110, 110);
+    lv_color_t RedTeam = lv_color_make(255, 74, 61);
+    lv_color_t BlueTeam = lv_color_make(38, 60, 255);
+    lv_color_t SkilsTeam = lv_color_make(81, 201, 79);
+    //end of colors made by me
+
+void pushud(int btn){
+    std::vector<VIS::S::Auton> AUTON = auton_selector.RED_autons;
+    int maxpage = auton_selector.RED_AC-1;
+    
+    if (auton_selector.SelTeam == 1){
+        AUTON = auton_selector.RED_autons;
+        maxpage = auton_selector.RED_AC-1;
+    } else if (auton_selector.SelTeam == 2){
+        AUTON = auton_selector.BLUE_autons;
+        maxpage = auton_selector.BLUE_AC-1;
+    } else if (auton_selector.SelTeam == 3){
+        AUTON = auton_selector.SKILS_auton;
+        maxpage = auton_selector.SKILS_AC-1;
     }
-    if (team == 2){
-        return pros::Color::blue; // Blue Team color
+
+    char upbtntext[128];
+    char dnbtntext[128];
+    char autodesctext[256];
+
+    // property changing
+    if (auton_selector.auton_page_current < maxpage && btn == 1){
+        auton_selector.auton_page_current++;
     }
-    if (team == 1){
-        return pros::Color::red;  // Red Team color
-    } else {
-        return pros::Color::gold; // Nothing
+
+    if (auton_selector.auton_page_current > 0 && btn == 2){
+        auton_selector.auton_page_current--;
     }
-}
 
-pros::screen_touch_status_s_t status;
-
-bool autoTest = false;
-
-const char* setarrowtext(int team, bool UParrow){
-    std::vector<VIS::S::Auton> red = auton_selector.RED_autons;
-    std::vector<VIS::S::Auton> blue = auton_selector.BLUE_autons;
-    std::vector<VIS::S::Auton> skils = auton_selector.SKILS_auton;
-    int currPage = auton_selector.auton_page_current;
-    const char* ret[3] = {"", "", ""};
-
-    if (UParrow){
-        if (currPage+1<=red.size()){
-            ret[0] = red[currPage+1].Name;
-        } else {
-            ret[0] = "No auton this way";
-        }
-
-        if (currPage+1<=blue.size()){
-            ret[1] = blue[currPage+1].Name;
-        } else {
-            ret[1] = "No auton this way";
-        }
-
-        if (currPage+1<=skils.size()){
-            ret[2] = skils[currPage+1].Name;
-        } else {
-            ret[2] = "No auton this way";
-        }
-    } else {
-        if (currPage-1<=0){
-            ret[0] = red[currPage-1].Name;
-        } else {
-            ret[0] = "No auton this way";
-        }
-
-        if (currPage-1<=0){
-            ret[1] = blue[currPage-1].Name;
-        } else {
-            ret[1] = "No auton this way";
-        }
-
-        if (currPage-1<=0){
-            ret[2] = skils[currPage-1].Name;
-        } else {
-            ret[2] = "No auton this way";
-        }
-    }
-    return ret[team-1];
-}
-
-int runto_test_X = 0;
-int runto_test_Y = 0;
-int runto_test_ang_X = 0;
-int runto_test_ang_Y = 0;
-bool ang_place = false; // false = place true = angle
-bool placeset = false;
-bool angleset = false;
-
-void runautotest(int posX, int posY, int point_to_X, int point_to_Y){
-    pros::delay(1000);
-    double scale = 144.0/230.0;
-    VIS::DRIVE::Drive_to_point(posX*scale, posY*scale);
-    VIS::TURN::Turn_to_Point(point_to_X*scale, point_to_Y*scale);
-}
-
-using namespace VIS::SCREEN::DRAW;
-
-//static objects
-rect TeamPlate(0,0,60, 240, pros::Color::dark_gray);
-
-//togglable selection buttons
-rrect RedSelBox(5, 5, 50, 50, 3, pros::Color::dark_grey);
-rrect BlueSelBox(5, 55, 50, 50, 3, pros::Color::dark_grey);
-rrect SkilsSelBox(5, 105, 50, 50, 3, pros::Color::dark_grey);
-
-//push buttons
-arrow up(260, 5, 50, 100, 0);
-arrow dn(260, 235, 50, 100, 180);
-rect ToNormalMode(250, 0, 40, 40, pros::Color::dark_gray);
-rect runTest(295, 0, 40, 40, pros::Color::dark_grey);
-rect ang_place_sw(245, 50, 85, 40, pros::Color::dark_grey);
-
-//map
-rect VirtualField(5, 5, 230, 230, pros::Color::white);
-
-void updateScreen(){
     int auton_page = auton_selector.auton_page_current;
-    std::vector<VIS::S::Auton> RED = auton_selector.RED_autons;
-    std::vector<VIS::S::Auton> BLUE = auton_selector.BLUE_autons;
-    std::vector<VIS::S::Auton> SKILS = auton_selector.SKILS_auton;
-    //changing propertys
-    if (SelTeam == 1){RedSelBox.Rect_color(GTC(1));} else {RedSelBox.Rect_color(pros::Color::white_smoke);}
-    if (SelTeam == 2){BlueSelBox.Rect_color(GTC(2));} else {BlueSelBox.Rect_color(pros::Color::white_smoke);}
-    if (SelTeam == 3){SkilsSelBox.Rect_color(GTC(3));} else {SkilsSelBox.Rect_color(pros::Color::white_smoke);}
 
-    //printing to the screen
-    if (autoTest){
-        pros::screen::erase();//clears the screen, this is placed as late as posable to reduce screen flikering
-
-        VirtualField.print();
-        ToNormalMode.print();
-        runTest.print();
-        ang_place_sw.print();
-
-        PRINT("Back", 255, 5, pros::Color::white, pros::E_TEXT_MEDIUM);
-        PRINT("Run", 300, 5, pros::Color::white, pros::E_TEXT_MEDIUM);
-
-        if (ang_place){
-            PRINT("Switch to place selection", 250, 55, pros::Color::white, pros::E_TEXT_MEDIUM);
-        } else {
-            PRINT("Switch to angle selection", 250, 55, pros::Color::white, pros::E_TEXT_MEDIUM);
-        }
-
-        if (placeset){
-            if (!ang_place){
-                pros::screen::set_pen(pros::Color::red);
-            } else {
-                pros::screen::set_pen(pros::Color::white);
-            }
-            pros::screen::draw_circle(runto_test_X, runto_test_Y, 8);
-        }
-
-        if (angleset){
-            if (ang_place){
-                pros::screen::set_pen(pros::Color::red);
-            } else {
-                pros::screen::set_pen(pros::Color::white);
-            }
-            pros::screen::draw_circle(runto_test_ang_X, runto_test_ang_Y, 3);
-        }
-        
-        if (placeset && angleset){
-            makeline(runto_test_X, runto_test_Y, runto_test_ang_X, runto_test_ang_Y);
-        }
+    if (auton_selector.auton_page_current < maxpage){
+        snprintf(upbtntext, sizeof(upbtntext), "Next Auton (%s)", AUTON[auton_page+1].Name);
     } else {
-        pros::screen::erase();//clears the screen, this is placed as late as posable to reduce screen flikering
-
-        TeamPlate.print();
-        PRINT("Skils", 20, 60, GTC(3),pros::E_TEXT_MEDIUM_CENTER);
-        PRINT("Blue Team", 20, 120, GTC(2), pros::E_TEXT_MEDIUM_CENTER);
-        PRINT("Red Team", 20, 180, GTC(1), pros::E_TEXT_MEDIUM_CENTER);
-        RedSelBox.print();
-        BlueSelBox.print();
-        SkilsSelBox.print();
-
-        up.print();
-        dn.print();
-        PRINT(setarrowtext(SelTeam, true), 260, 10, pros::Color::white, pros::E_TEXT_MEDIUM_CENTER);
-        PRINT(setarrowtext(SelTeam, false), 260, 220, pros::Color::white, pros::E_TEXT_MEDIUM_CENTER);
-        
-        if (SelTeam == 1){
-            PRINT(RED[auton_page].Name, 260, 25, pros::Color::white, pros::E_TEXT_MEDIUM_CENTER);
-            PRINT(RED[auton_page].Desc, 60, 40, pros::Color::white, pros::E_TEXT_MEDIUM);
-        }
-
-        if (SelTeam == 2){
-            PRINT(BLUE[auton_page].Name, 260, 25, pros::Color::white, pros::E_TEXT_MEDIUM_CENTER);
-            PRINT(BLUE[auton_page].Desc, 60, 40, pros::Color::white, pros::E_TEXT_MEDIUM);
-        }
-
-        if (SelTeam == 3){
-            PRINT(SKILS[auton_page].Name, 260, 25, pros::Color::white, pros::E_TEXT_MEDIUM_CENTER);
-            PRINT(SKILS[auton_page].Desc, 60, 40, pros::Color::white, pros::E_TEXT_MEDIUM);
-        }
+        snprintf(upbtntext, sizeof(upbtntext), "No Auton Here");
     }
+
+    if (auton_selector.auton_page_current > 0){
+        snprintf(dnbtntext, sizeof(dnbtntext), "Prev Auton (%s)", AUTON[auton_page-1].Name);
+    } else {
+        snprintf(dnbtntext, sizeof(dnbtntext), "No Auton Here");
+    }
+
+    snprintf(autodesctext, sizeof(autodesctext), "Auton Title: %s\nDesc: %s", AUTON[auton_page].Name, AUTON[auton_page].Desc);
+    
+    lv_label_set_text(nextautoup, upbtntext);
+    lv_label_set_text(nextautodn, dnbtntext);
+    lv_label_set_text(AutoDesc, autodesctext);
 }
 
-// touch interpretation
-pros::touch_event_cb_fn_t onPress(int Xpos, int Ypos){
-    if (RedSelBox.Touching(Xpos, Ypos) && !autoTest){SelTeam = 1; auton_selector.auton_page_current = 0;}
-    if (BlueSelBox.Touching(Xpos, Ypos) && !autoTest){SelTeam = 2; auton_selector.auton_page_current = 0;}
-    if (SkilsSelBox.Touching(Xpos, Ypos) && !autoTest){SelTeam = 3; auton_selector.auton_page_current = 0;}
-    if (up.Touching(Xpos, Ypos) && !autoTest){
-        if (SelTeam == 1 && auton_selector.auton_page_current<auton_selector.RED_autons.size()){
-            auton_selector.auton_page_current++;
-        }
-        if (SelTeam == 2 && auton_selector.auton_page_current<auton_selector.BLUE_autons.size()){
-            auton_selector.auton_page_current++;
-        }
-        if (SelTeam == 3 && auton_selector.auton_page_current<auton_selector.SKILS_auton.size()){
-            auton_selector.auton_page_current++;
-        }
-    }
-    if (dn.Touching(Xpos, Ypos) && auton_selector.auton_page_current>0 && !autoTest){auton_selector.auton_page_current--;}
+void updateScreen(lv_event_t *e){
+    lv_obj_t *TD = lv_event_get_target(e);
+    uint32_t btnid = lv_btnmatrix_get_selected_btn(TD);
 
-    if (ToNormalMode.Touching(Xpos, Ypos) && autoTest){autoTest = false;}
-    if (VirtualField.Touching(Xpos, Ypos) && autoTest){
-        if (ang_place){
-            angleset = true;
-            runto_test_ang_X = Xpos;
-            runto_test_ang_Y = Ypos;
+    //logic
+    
+    if (btnid != LV_BTNMATRIX_BTN_NONE){
+        if (lv_btnmatrix_get_btn_text(btnmtx, btnid) == buttonmtxlayout[0]){
+            auton_selector.SelTeam = 1;
+            auton_selector.auton_page_current = 0;
+
+            lv_obj_clear_flag(rselbox, LV_OBJ_FLAG_HIDDEN);
+
+            lv_obj_add_flag(bselbox, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(sselbox, LV_OBJ_FLAG_HIDDEN);
+
+        } else if (lv_btnmatrix_get_btn_text(btnmtx, btnid) == buttonmtxlayout[2]){
+            auton_selector.SelTeam = 2;
+            auton_selector.auton_page_current = 0;
+
+            lv_obj_clear_flag(bselbox, LV_OBJ_FLAG_HIDDEN);
+
+            lv_obj_add_flag(rselbox, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(sselbox, LV_OBJ_FLAG_HIDDEN);
+
+        } else if (lv_btnmatrix_get_btn_text(btnmtx, btnid) == buttonmtxlayout[4]){
+            auton_selector.SelTeam = 3;
+            auton_selector.auton_page_current = 0;
+
+            lv_obj_clear_flag(sselbox, LV_OBJ_FLAG_HIDDEN);
+
+            lv_obj_add_flag(rselbox, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bselbox, LV_OBJ_FLAG_HIDDEN);
+
         } else {
-            placeset = true;
-            runto_test_X = Xpos;
-            runto_test_Y = Ypos;
+            auton_selector.SelTeam = 1;
+            lv_obj_add_flag(rselbox, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bselbox, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(sselbox, LV_OBJ_FLAG_HIDDEN);
         }
+        pushud(0);//flags as a null trigger (to bypass the button system)
     }
-    if (runTest.Touching(Xpos, Ypos) && autoTest){runautotest(runto_test_X, runto_test_Y, runto_test_ang_X, runto_test_ang_Y);}
-
-    updateScreen();
-    return NULL;
 }
 
-pros::touch_event_cb_fn_t onHold(int Xpos, int Ypos){
-    if (RedSelBox.Touching(Xpos, Ypos)){autoTest = true;}
+void dnbtnhand(lv_event_t * e){
+    pushud(2);//flags as a down trigger
+}
 
-    updateScreen();
-    return NULL;
+void upbtnhand(lv_event_t * e){
+    pushud(1);//flags as an up trigger
 }
 
 void start(){
-    using namespace VIS::SCREEN::DRAW;
-    pros::screen::set_eraser(pros::Color::black);
-    TeamPlate.Rect_fill(true);
-    ToNormalMode.Rect_fill(true);
-    runTest.Rect_fill(true);
-    ang_place_sw.Rect_fill(true);
+    pros::Task lvglruntime([](void) {
+        while (false){
+            lv_obj_invalidate(nextautodn);
+            lv_obj_invalidate(nextautoup);
+            pros::delay(5);
+        }
+    });
 
-    //touch interpretation
-    status = pros::screen::touch_status();
-    pros::screen::touch_callback(onPress(status.x, status.y), pros::E_TOUCH_PRESSED);
-    pros::screen::touch_callback(onHold(status.x, status.y), pros::E_TOUCH_HELD);
+    //This function sets defulat values for objects on screen
+
+    //Team selection plate creation
+    //button matrix
+    lv_obj_set_size(btnmtx, 160, 240);
+    lv_obj_set_style_bg_color(btnmtx, Grey, LV_STATE_ANY);
+    lv_obj_set_style_opa(btnmtx, 100, LV_STATE_ANY);
+    lv_btnmatrix_set_map(btnmtx, buttonmtxlayout);
+    lv_obj_set_style_bg_color(btnmtx, LightGrey, LV_PART_ITEMS);
+    lv_obj_set_style_text_font(btnmtx, &lv_font_montserrat_18, LV_PART_ITEMS);
+    lv_obj_add_event_cb(btnmtx, updateScreen, LV_EVENT_ALL, lv_obj_get_user_data(btnmtx));
+
+    //Curently selected team outline
+        //red team
+            lv_obj_set_size(rselbox, 115, 55);
+            lv_obj_align(rselbox, LV_ALIGN_TOP_LEFT, 2, 1);
+            lv_obj_set_style_radius(rselbox, 8, LV_PART_MAIN);
+            lv_obj_set_style_bg_opa(rselbox, 0, LV_PART_MAIN);
+            lv_obj_set_style_border_opa(rselbox, 255, LV_STATE_ANY);
+            lv_obj_set_style_border_color(rselbox, RedTeam, LV_PART_MAIN);
+            lv_obj_set_style_border_width(rselbox, 4, LV_PART_MAIN);
+            lv_obj_add_flag(rselbox, LV_OBJ_FLAG_HIDDEN);
+
+        //blue team
+            lv_obj_set_size(bselbox, 115, 55);
+            lv_obj_align(bselbox, LV_ALIGN_LEFT_MID, 2, -3);
+            lv_obj_set_style_radius(bselbox, 8, LV_PART_MAIN);
+            lv_obj_set_style_bg_opa(bselbox, 0, LV_PART_MAIN);
+            lv_obj_set_style_border_opa(bselbox, 255, LV_STATE_ANY);
+            lv_obj_set_style_border_color(bselbox, BlueTeam, LV_PART_MAIN);
+            lv_obj_set_style_border_width(bselbox, 4, LV_PART_MAIN);
+            lv_obj_add_flag(bselbox, LV_OBJ_FLAG_HIDDEN);
+            
+        //skils team
+            lv_obj_set_size(sselbox, 115, 55);
+            lv_obj_align(sselbox, LV_ALIGN_BOTTOM_LEFT, 2, -6);
+            lv_obj_set_style_radius(sselbox, 8, LV_PART_MAIN);
+            lv_obj_set_style_bg_opa(sselbox, 0, LV_PART_MAIN);
+            lv_obj_set_style_border_opa(sselbox, 255, LV_STATE_ANY);
+            lv_obj_set_style_border_color(sselbox, SkilsTeam, LV_PART_MAIN);
+            lv_obj_set_style_border_width(sselbox, 4, LV_PART_MAIN);
+            lv_obj_add_flag(sselbox, LV_OBJ_FLAG_HIDDEN);
+
+    //auton desc box
+    lv_obj_align(AutoDesc, LV_ALIGN_CENTER, 80, 0);
+    lv_obj_set_size(AutoDesc, 300, 140);
+
+    //auton up button
+    lv_obj_set_size(upbtn, 280, 40);
+    lv_obj_align(upbtn, LV_ALIGN_TOP_MID, 80, 5);
+    lv_obj_add_event_cb(upbtn, upbtnhand, LV_EVENT_RELEASED, nullptr);
+        lv_obj_align(nextautoup, LV_ALIGN_CENTER, 0, 0);
+        lv_label_set_text(nextautoup, "Next Auton");
+
+    //auton dn button
+    lv_obj_set_size(dnbtn, 280, 40);
+    lv_obj_align(dnbtn, LV_ALIGN_BOTTOM_MID, 80, -5);
+    lv_obj_add_event_cb(dnbtn, dnbtnhand, LV_EVENT_RELEASED, nullptr);
+        lv_obj_align(nextautodn, LV_ALIGN_CENTER, 0, 0);
+        lv_label_set_text(nextautodn, "Prev Auton");
 }
 
 void VIS::S::run(){
