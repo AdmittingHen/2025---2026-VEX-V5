@@ -1,6 +1,8 @@
 #include "Visual VEX/LemLib_setup.hpp"
-#include "Visual VEX/VISUAL_API.hpp" // IWYU pragma: keep
+#include "Visual VEX/VISUAL API.hpp" // IWYU pragma: keep
+#include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
+#include <cstdio>
 #include <cstdlib>
 
 int ToPointTimeout = 8000;
@@ -11,21 +13,21 @@ int TurnTimeoutMult = 3;
 
 //---general functions used for autons---
 
-lemlib::Pose position(){//gets robot odom position
+lemlib::Pose VIS::position(){//gets robot odom position
     return chassis.getPose();
 }
 
 //---timeout calculation---
 
-int CalcTimeout(int angulardist){
+int VIS::CalcTimeout(int angulardist){
     return TurnTimeout + (angulardist*TurnTimeoutMult);
 }
 
-int CalcTimeout(int angulardist, int speed){
+int VIS::CalcTimeout(int angulardist, int speed){
     return TurnTimeout + (angulardist*TurnTimeoutMult);
 }
 
-int calcTimoutDrive(int Xdist, int Ydist, float speed){
+int VIS::calcTimoutDrive(int Xdist, int Ydist, float speed){
     return ((Xdist+Ydist)/2.0)*speed*timeoutmult;
 }
 
@@ -125,10 +127,16 @@ void VIS::DRIVE::Drive_to_point_and_face(float X, float Y, float X2, float Y2, f
     chassis.turnToPoint(X2, Y2, 4000, {.maxSpeed = TurnMaxSpeed});
 }
 
+//-----------------------------------------------Other functions-----------------------------------------------
+
 void VIS::DRIVE::stop(){
     chassis.cancelMotion();
 }
 
 void VIS::DRIVE::stopall(){
     chassis.cancelAllMotions();
+}
+
+void VIS::DRIVE::runodomfile(const asset file, int lookAhead){
+    chassis.follow(file, 4, 999999999);
 }
