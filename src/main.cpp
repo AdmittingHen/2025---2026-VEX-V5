@@ -21,11 +21,6 @@ void initialize(){
     pros::Vision eye(1, pros::E_VISION_ZERO_TOPLEFT);
 
     chassis.calibrate(); // calibrate sensors
-
-    // the default rate is 50. however, if you need to change the rate, you
-    // can do the following.
-    // lemlib::bufferedStdout().setRate(...);
-    // If you use bluetooth or a wired connection, you will want to have a rate of 10ms
 }
 
 /**
@@ -46,14 +41,11 @@ void autonomous(){
     VIS::S::run();//this runs the selected auton
 }
 
-float DriveTrain_values[4] = {6, //this is fwrd/back curve
-                              6, //this is turning curve
-                              30, //this is the curve for active brake 
-                              0.2 //this is activebrake strength
-                             };
+float activebrake_power = 0.05;
+float activebrake_curve = 8;
 
-lemlib::PID LeftActiveBrake(DriveTrain_values[3], 0, 0);
-lemlib::PID RightActiveBrake(DriveTrain_values[3], 0, 0);
+lemlib::PID LeftActiveBrake(activebrake_power, 0, 0);
+lemlib::PID RightActiveBrake(activebrake_power, 0, 0);
 
 void updateDrive(){
     // get joystick positions
@@ -62,9 +54,10 @@ void updateDrive(){
 
     // move the chassis with curvature drive
     if (abs(leftY + rightX)<2){
-        chassis.tank(pow(LeftActiveBrake.update(rightMotors.get_actual_velocity()), DriveTrain_values[2]), pow(RightActiveBrake.update(leftMotors.get_actual_velocity()), DriveTrain_values[2]));
+        chassis.tank(pow(LeftActiveBrake.update(rightMotors.get_actual_velocity()), activebrake_curve), 
+                    pow(RightActiveBrake.update(leftMotors.get_actual_velocity()), activebrake_curve));
     } else {
-        chassis.arcade(pow(leftY, DriveTrain_values[0]), pow(rightX, DriveTrain_values[1]));
+        chassis.arcade(leftY, rightX);
     }
 }
 
@@ -72,17 +65,18 @@ void updateDrive(){
  * Runs in driver control
  */
 void opcontrol(){
+    bool allowAutonTest = true;
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
     //runs the driver loop
     while (true){
 
-        if (!pros::competition::is_connected() && (controller.get_digital(DIGITAL_A) && controller.get_digital(DIGITAL_B))){
+        if (allowAutonTest && !pros::competition::is_connected() && (controller.get_digital(DIGITAL_A) && controller.get_digital(DIGITAL_B))){
             autonomous();// if no field is conected and buttons A and B are pressed, the bot will run the selected auton
         }
 
 		updateDrive(); //this function updates the drivetrain with new contoller inputs
         
         // delay to save resources
-        pros::delay(10);
+        pros::delay(6);
     }
 }

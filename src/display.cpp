@@ -1,20 +1,7 @@
 #include "Visual VEX/VISUAL API.hpp"
-#include "liblvgl/core/lv_disp.h"
-#include "liblvgl/core/lv_event.h"
-#include "liblvgl/core/lv_obj.h"
-#include "liblvgl/core/lv_obj_pos.h"
-#include "liblvgl/core/lv_obj_style.h"
-#include "liblvgl/core/lv_refr.h"
-#include "liblvgl/hal/lv_hal_tick.h"
-#include "liblvgl/misc/lv_area.h"
-#include "liblvgl/misc/lv_color.h"
-#include "liblvgl/widgets/lv_btnmatrix.h"
-#include "liblvgl/widgets/lv_label.h"
-#include "pros/rtos.hpp"
-#include <cmath>
+#include "Visual VEX\LemLib_setup.hpp"
+#include "pros/misc.h"
 #include <cstdio>
-#include <optional>
-#include <vector>
 
 VIS::S::AutonSelector auton_selector;
 
@@ -22,7 +9,10 @@ VIS::S::AutonSelector auton_selector;
 
 //for adding an auton go to the end of the line above the team comment
 //then type comma > enter/return > {} end
-//now just follow the format of the other autons that are already there
+
+//The first item is the title of the auton, it will show on the next and prev buttons as well as in the desc box
+//the second item is the desc, it is a longer string that will be shown as in the desc box only for the selected auton
+//The third item is the callback, this is the function the auton will call. You will have to go to Visual VEX/AutonFunc.hpp and add the function deff, then add the code in src/AutonCode.cpp
 void VIS::Setup_Autons(){
     auton_selector.autons_add(
     {{"red team test 1", "This is a red team auton function", drivefunc},
@@ -43,6 +33,18 @@ start();
 
 //this is selector display code -- forms the selector
 
+    //these are the colors used by the brain you can change the RGB code for the colors but do not chage the name of the variable
+    //colors made by me
+    lv_color_t Grey = lv_color_make(70, 70, 70);
+    lv_color_t LightGrey = lv_color_make(110, 110, 110);
+    lv_color_t RedTeam = lv_color_make(255, 74, 61);
+    lv_color_t BlueTeam = lv_color_make(38, 60, 255);
+    lv_color_t SkilsTeam = lv_color_make(96, 222, 73);
+    //end of colors made by me
+
+
+//don't change code below this line you could really mess somthing up and then I have to try to fix it
+
 //team plate def
 lv_obj_t *btnmtx = lv_btnmatrix_create(lv_scr_act());
 static const char *buttonmtxlayout[] = {"Red Team", "\n", "Blue Team", "\n", "Skils Team", ""};
@@ -59,13 +61,28 @@ lv_obj_t *upbtn = lv_btn_create(lv_scr_act());
 lv_obj_t *dnbtn = lv_btn_create(lv_scr_act());
     lv_obj_t *nextautodn = lv_label_create(dnbtn);
 
-    //colors made by me
-    lv_color_t Grey = lv_color_make(70, 70, 70);
-    lv_color_t LightGrey = lv_color_make(110, 110, 110);
-    lv_color_t RedTeam = lv_color_make(255, 74, 61);
-    lv_color_t BlueTeam = lv_color_make(38, 60, 255);
-    lv_color_t SkilsTeam = lv_color_make(81, 201, 79);
-    //end of colors made by me
+    char upbtntext[64];
+    char dnbtntext[64];
+    char autodesctext[256];
+
+    int minbatterycap = 40;
+
+const char* setERRflags(bool control, int batterycap){
+    bool conERR = !control;
+    bool batERR = batterycap < minbatterycap;
+
+    if (batERR && conERR){
+        return "!|Controler Disconected - Low Battery|!\n";//both errors
+    } else {
+        if (batERR){
+            return "!|Low Battery|!\n";//low battery
+        } else if (conERR){
+            return "!|Controler Not Conected|!\n";//controler not conected
+        } else {
+            return "";
+        }
+    }
+}
 
 void pushud(int btn){
     std::vector<VIS::S::Auton> AUTON = auton_selector.RED_autons;
@@ -81,10 +98,6 @@ void pushud(int btn){
         AUTON = auton_selector.SKILS_auton;
         maxpage = auton_selector.SKILS_AC-1;
     }
-
-    char upbtntext[128];
-    char dnbtntext[128];
-    char autodesctext[256];
 
     // property changing
     if (auton_selector.auton_page_current < maxpage && btn == 1){
@@ -109,7 +122,7 @@ void pushud(int btn){
         snprintf(dnbtntext, sizeof(dnbtntext), "No Auton Here");
     }
 
-    snprintf(autodesctext, sizeof(autodesctext), "Auton Title: %s\nDesc: %s", AUTON[auton_page].Name, AUTON[auton_page].Desc);
+    snprintf(autodesctext, sizeof(autodesctext), "%sAuton Title: %s\nDesc: %s", setERRflags(controller.is_connected(), pros::c::battery_get_capacity()), AUTON[auton_page].Name, AUTON[auton_page].Desc);
     
     lv_label_set_text(nextautoup, upbtntext);
     lv_label_set_text(nextautodn, dnbtntext);
@@ -170,10 +183,11 @@ void upbtnhand(lv_event_t * e){
 
 void start(){
     pros::Task lvglruntime([](void) {
-        while (false){
-            lv_obj_invalidate(nextautodn);
-            lv_obj_invalidate(nextautoup);
-            pros::delay(5);
+        bool lastrun = false, lastrunbat = false;
+        while (true){
+            if (controller.is_connected() != lastrun){pushud(0);}
+            if ((pros::c::battery_get_capacity() < minbatterycap) != lastrunbat){pushud(0);}
+            pros::delay(20);
         }
     });
 
