@@ -1,7 +1,11 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
+<<<<<<< Updated upstream
     "project_name": "Visual Vex V0.8",
+=======
+    "project_name": "Visual Vex V1.0",
+>>>>>>> Stashed changes
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -298,7 +302,12 @@
       }
     },
     "upload_options": {
+<<<<<<< Updated upstream
       "description": "The auton selector format is working Lemlib is the last thing that needs testing"
+=======
+      "description": "Everything should work",
+      "icon": "pizza"
+>>>>>>> Stashed changes
     },
     "use_early_access": true
   }

@@ -1,5 +1,8 @@
 #include "VISUAL API.hpp" // IWYU pragma: keep
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/chassis/chassis.hpp"
+#include "lemlib/chassis/trackingWheel.hpp"
+#include "lemlib/pid.hpp"
 
 #pragma once
 
@@ -7,8 +10,13 @@
 inline pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor groups
+<<<<<<< Updated upstream
 inline pros::MotorGroup leftMotors({-5, 4, -3}, pros::MotorGearset::blue); // left motor group - ports 5 (reversed), 4, 3 (reversed)
 inline pros::MotorGroup rightMotors({6, -9, 7}, pros::MotorGearset::blue); // right motor group - ports 6, 9 (reversed), 7
+=======
+    inline pros::MotorGroup leftMotors({-5, 4, -3}, pros::MotorGearset::blue); // left motor group - ports 5 (reversed), 4, 3 (reversed)
+    inline pros::MotorGroup rightMotors({6, -9, 7}, pros::MotorGearset::blue); // right motor group - ports 6, 9 (reversed), 7
+>>>>>>> Stashed changes
 
 // Inertial Sensor on port 10
 inline pros::Imu imu(10);
@@ -85,3 +93,8 @@ inline lemlib::Chassis chassis(drivetrain, linearController, angularController, 
 
 // pros::adi::DigitalOut piston('A'); // this is a true/false signal named piston on 3 wire port A
 // lemlib::PID name(1,0,2); // this is a pid callled name with p = 1 i = 0 d = 2
+
+inline int motorports[6] = {0, 0, 0, 0, 0, 0}; //if you make a motor add the port number here (don't include DriveTrain motors)
+//fill the list with zeros if you don't have 6 motors ex:
+//motorports[6] = {1, 2, 4, 5, 0, 0};
+//this makes the list with motors on ports 1, 2, 4, 5
