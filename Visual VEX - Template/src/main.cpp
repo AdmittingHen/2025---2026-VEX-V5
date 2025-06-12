@@ -1,23 +1,11 @@
-#include "Visual VEX/VISUAL_API.hpp"
-#include "Visual VEX\AutonCode.cpp"
+#include "Visual VEX/LemLib_setup.hpp"
+#include "pros/misc.hpp"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
+#include <algorithm>
 #include <cmath>
 
-void Setup_Autons(){
-    auton_selector.autons_add(
-        {{"red team test", "This is a red team auton function", drivefunc},
-              {"red team test 2", "This is another red team function", drivefunc2}
-    }, 
-        {{"blue team test", "This is a blue team auton function", turnfunc},
-               {"blue team test 2", "This is another blue team function", turnfunc2}
-    }, 
-        {{"skils test", "This is a Skils function it has no team", skils},
-                {"skils test 2", "This is another Skils function you probably wont ever need another of these", skils2}
-    }
-    );
-    auton_selector.auton_print();
-}
+#include <stdlib.h>
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -25,16 +13,12 @@ void Setup_Autons(){
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
 void initialize(){
     //add autons to the selector
-    Setup_Autons();
+    VIS::Setup_Autons();
 
     chassis.calibrate(); // calibrate sensors
-
-    // the default rate is 50. however, if you need to change the rate, you
-    // can do the following.
-    // lemlib::bufferedStdout().setRate(...);
-    // If you use bluetooth or a wired connection, you will want to have a rate of 10ms
 }
 
 /**
@@ -47,25 +31,18 @@ void disabled(){}
  */
 void competition_initialize(){}
 
-// get a path used for pure pursuit
-// this needs to be put outside a function
-ASSET(example_txt); // '.' replaced with "_" to make c++ happy
-
 /**
  * Runs during auto
  */
 void autonomous(){
-    auton_selector.selected_auton_run();
+    chassis.setPose(0,0,0);
+    VIS::S::run();//this runs the selected auton
 }
 
-float DriveTrain_values[4] = {6, //this is fwrd/back curve
-                              6, //this is turning curve
-                              30, //this is the curve for active brake 
-                              0.2 //this is activebrake strength
-                             };
+float activebrake_power = 0.01;//leave this very small
 
-lemlib::PID LeftActiveBrake(DriveTrain_values[3], 0, 0);
-lemlib::PID RightActiveBrake(DriveTrain_values[3], 0, 0);
+lemlib::PID ActiveBrakeR(activebrake_power, 0, 0.2);
+lemlib::PID ActiveBrakeL(activebrake_power, 0, 0.2);
 
 void updateDrive(){
     // get joystick positions
@@ -73,10 +50,16 @@ void updateDrive(){
     int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
     // move the chassis with curvature drive
-    if (abs(leftY + rightX)<2){
-        chassis.tank(pow(LeftActiveBrake.update(rightMotors.get_actual_velocity()), DriveTrain_values[2]), pow(RightActiveBrake.update(leftMotors.get_actual_velocity()), DriveTrain_values[2]));
+    if (abs(leftY) + abs(rightX)<2){
+        double brakeR = ActiveBrakeR.update(0-rightMotors.get_actual_velocity());
+        double brakeL = ActiveBrakeL.update(0-leftMotors.get_actual_velocity());
+        double brakepwrR = abs(rightMotors.get_actual_velocity()) > 10 ? std::max(-10.0, std::min(brakeR, 10.0)) : 0;
+        double brakepwrL = abs(leftMotors.get_actual_velocity()) > 10 ? std::max(-10.0, std::min(brakeL, 10.0)) : 0;
+        chassis.tank(brakepwrL, brakepwrR);
     } else {
-        chassis.arcade(pow(leftY, DriveTrain_values[0]), pow(rightX, DriveTrain_values[1]));
+        chassis.arcade(leftY, rightX);
+        ActiveBrakeR.reset();
+        ActiveBrakeL.reset();
     }
 }
 
@@ -84,12 +67,21 @@ void updateDrive(){
  * Runs in driver control
  */
 void opcontrol(){
+    bool allowAutonTest = true;
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
     //runs the driver loop
     while (true){
+
+        if (allowAutonTest && !pros::competition::is_connected() && (controller.get_digital(DIGITAL_A) && controller.get_digital(DIGITAL_B))){
+            chassis.tank(0, 0);
+            autonomous();// if no field is conected and buttons A and B are pressed, the bot will run the selected auton
+        }
+
 		updateDrive(); //this function updates the drivetrain with new contoller inputs
+
+        //put other code below this line
         
         // delay to save resources
-        pros::delay(10);
+        pros::delay(6);
     }
 }

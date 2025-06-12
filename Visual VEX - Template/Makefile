@@ -41,6 +41,8 @@ TEMPLATE_FILES=$(INCDIR)/$(LIBNAME)/*.h $(INCDIR)/$(LIBNAME)/*.hpp
 
 .DEFAULT_GOAL=quick
 
+SOURCES = src/main.cpp src/display.cpp src/Auton_manager/Screen.cpp
+
 ################################################################################
 ################################################################################
 ########## Nothing below this line should be edited by typical users ###########
