@@ -1,9 +1,6 @@
 #include "Visual VEX\VISUAL API.hpp"
-<<<<<<< Updated upstream
-=======
 #include "Visual VEX\LemLib_setup.hpp"
 #include "pros/rtos.hpp"
->>>>>>> Stashed changes
 
 //use DRIVE:: (the function you want to use) for driving to positions or for distances
 //use DRIVE::SETUP (the function you want to use) for driving constants

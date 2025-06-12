@@ -10,13 +10,8 @@
 inline pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-<<<<<<< Updated upstream
-inline pros::MotorGroup leftMotors({-5, 4, -3}, pros::MotorGearset::blue); // left motor group - ports 5 (reversed), 4, 3 (reversed)
-inline pros::MotorGroup rightMotors({6, -9, 7}, pros::MotorGearset::blue); // right motor group - ports 6, 9 (reversed), 7
-=======
     inline pros::MotorGroup leftMotors({-5, 4, -3}, pros::MotorGearset::blue); // left motor group - ports 5 (reversed), 4, 3 (reversed)
     inline pros::MotorGroup rightMotors({6, -9, 7}, pros::MotorGearset::blue); // right motor group - ports 6, 9 (reversed), 7
->>>>>>> Stashed changes
 
 // Inertial Sensor on port 10
 inline pros::Imu imu(10);

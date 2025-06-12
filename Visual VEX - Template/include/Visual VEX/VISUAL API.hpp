@@ -11,24 +11,6 @@ void start();
 namespace VIS{
     void Setup_Autons();
     lemlib::Pose position();
-<<<<<<< Updated upstream
-    int CalcTimeout(int angulardist);
-    int CalcTimeout(int angulardist, int speed);
-    int calcTimoutDrive(int Xdist, int Ydist, float speed);
-    
-    namespace DRIVE{
-        //drive functions
-        void Drive(int dist, float speed);
-        void Drive_to_point(float X, float Y);
-        void Drive_to_point(float X, float Y, float maxspeed);
-        void Drive_to_point_and_face(float X, float Y, int angle);
-        void Drive_to_point_and_face(float X, float Y, int angle, float maxspeed);
-        void Drive_to_point_and_face(float X, float Y, float X2, float Y2);
-        void Drive_to_point_and_face(float X, float Y, float X2, float Y2, float DriveMaxSpeed, int TurnMaxSpeed);
-        void stop();
-        void stopall();
-        void runodomfile(const asset, int);
-=======
     
     void waitfor(float value_to_wait_for);
     /*
@@ -166,7 +148,6 @@ namespace VIS{
                 for motions with need for acuracy use a higher value
                 for motions with less need for acuracy use a smaller value
         */
->>>>>>> Stashed changes
         namespace SETUP {
             void Set_timeout_mult(float newmult);
             void Set_ToPoint_timeout(int newtime);
@@ -174,18 +155,6 @@ namespace VIS{
     } // namespcae VIS::DRIVE
 
     namespace TURN {
-<<<<<<< Updated upstream
-        //turn functions
-        void turn(int DegToTurn);
-        void turn(int DegToTurn, int maxspeed);
-        void Turn_to_Heading(int TargetHeading);
-        void Turn_to_Heading(int TargetHeading, int maxspeed);
-        void Turn_to_Point(float point_x, float point_y);
-        void Turn_to_Point(float point_x, float point_y, int maxspeed);
-        void right_swing(float heading_to_end);
-        void left_swing(float heading_to_end);
-        void waitfor(float value_to_wait_for);
-=======
         void turn(double DegToTurn);
         /*
             turn will turn the bot a giving number of degrees
@@ -265,7 +234,6 @@ namespace VIS{
                 This is the heading that the turn will be ended
         */
 
->>>>>>> Stashed changes
         namespace SETUP{
             //turn value setup functions
             void SetTurnTimeoutMinimum(int NewTimeout);
@@ -298,8 +266,6 @@ namespace VIS{
           void selected_auton_run();
           void autons_add(std::vector<Auton> RED, std::vector<Auton> BLUE, std::vector<Auton> SKILS);
         };
-<<<<<<< Updated upstream
-=======
 
         class controllerDC_DATA_STRUCT{
             public:
@@ -315,6 +281,5 @@ namespace VIS{
                 double E_TIME;//this is end time of match clock in seconds
                 double DURATION;//this is the duration the controller disconcted for in seconds
         };
->>>>>>> Stashed changes
     }  // namespace S
 } // namespace VIS

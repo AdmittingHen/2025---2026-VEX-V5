@@ -2,11 +2,8 @@
 #include "Visual VEX/VISUAL API.hpp" // IWYU pragma: keep
 #include "lemlib/asset.hpp"
 #include "lemlib/chassis/chassis.hpp"
-<<<<<<< Updated upstream
-=======
 #include "lemlib/util.hpp"
 #include <cmath>
->>>>>>> Stashed changes
 #include <cstdio>
 #include <cstdlib>
 
@@ -16,34 +13,10 @@ int timeoutmult = 8000;
 int TurnTimeout = 500;
 int TurnTimeoutMult = 3;
 
-<<<<<<< Updated upstream
-//---general functions used for autons---
-
-=======
->>>>>>> Stashed changes
 lemlib::Pose VIS::position(){//gets robot odom position
     return chassis.getPose();
 }
 
-<<<<<<< Updated upstream
-//---timeout calculation---
-
-int VIS::CalcTimeout(int angulardist){
-    return TurnTimeout + (angulardist*TurnTimeoutMult);
-}
-
-int VIS::CalcTimeout(int angulardist, int speed){
-    return TurnTimeout + (angulardist*TurnTimeoutMult);
-}
-
-int VIS::calcTimoutDrive(int Xdist, int Ydist, float speed){
-    return ((Xdist+Ydist)/2.0)*speed*timeoutmult;
-}
-
-//---setup functions---
-
-=======
->>>>>>> Stashed changes
 void VIS::TURN::SETUP::SetTurnTimeoutMinimum(int NewTimeout){
     if (NewTimeout < 100) return;
     TurnTimeout = NewTimeout;
@@ -62,28 +35,6 @@ void VIS::DRIVE::SETUP::Set_timeout_mult(float newmult){
     timeoutmult = newmult;
 }
 
-<<<<<<< Updated upstream
-//-----------------------------------------------Turn functions-----------------------------------------------
-
-void VIS::TURN::turn(int DegToTurn){
-    DegToTurn = std::abs(position().theta + DegToTurn);
-    chassis.turnToHeading(DegToTurn, CalcTimeout(DegToTurn));
-}
-
-void VIS::TURN::turn(int DegToTurn, int maxspeed){
-    DegToTurn = std::abs(position().theta + DegToTurn);
-    chassis.turnToHeading(DegToTurn, CalcTimeout(DegToTurn, maxspeed), {.maxSpeed = maxspeed});
-}
-
-void VIS::TURN::Turn_to_Heading(int TargetHeading){
-    int TOut = std::abs(position().theta - TargetHeading);
-    chassis.turnToHeading(TargetHeading, CalcTimeout(TOut));
-}
-
-void VIS::TURN::Turn_to_Heading(int TargetHeading, int maxspeed){
-    int TOut = std::abs(position().theta - TargetHeading);
-    chassis.turnToHeading(TargetHeading, CalcTimeout(TOut, maxspeed), {.maxSpeed = maxspeed});
-=======
 void VIS::TURN::turn(double DegToTurn){
     lemlib::AngularDirection turndir = DegToTurn < 0? lemlib::AngularDirection::CCW_COUNTERCLOCKWISE : lemlib::AngularDirection::CW_CLOCKWISE;
     DegToTurn = position().theta + DegToTurn;
@@ -130,49 +81,25 @@ void VIS::TURN::Turn_to_Heading(int TargetHeading){
 void VIS::TURN::Turn_to_Heading(int TargetHeading, int maxspeed){
     chassis.turnToHeading(TargetHeading, 5000, {.maxSpeed = maxspeed});
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::TURN::Turn_to_Point(float point_x, float point_y){
     chassis.turnToPoint(point_x, point_y, 4000);
-<<<<<<< Updated upstream
-=======
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::TURN::Turn_to_Point(float point_x, float point_y, int maxspeed){
     chassis.turnToPoint(point_x, point_y, 4000, {.maxSpeed = maxspeed});
-<<<<<<< Updated upstream
-=======
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::TURN::right_swing(float heading_to_end){
     chassis.swingToHeading(heading_to_end, lemlib::DriveSide::RIGHT, 8000);
-<<<<<<< Updated upstream
-=======
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::TURN::left_swing(float heading_to_end){
     chassis.swingToHeading(heading_to_end, lemlib::DriveSide::LEFT, 8000);
-<<<<<<< Updated upstream
-}
-
-void VIS::TURN::waitfor(float value_to_wait_for){
-    chassis.waitUntil(value_to_wait_for);
-}
-
-//-----------------------------------------------Drive functions-----------------------------------------------
-
-void VIS::DRIVE::Drive(int dist, float speed){
-    int pointX = cos(position().theta)*dist;
-    int pointY = sin(position().theta)*dist;
-    chassis.moveToPose(pointX, pointY, position().theta, 8000, {.maxSpeed = speed});
-=======
     chassis.waitUntilDone();
 }
 
@@ -183,59 +110,30 @@ void VIS::waitfor(float value_to_wait_for){
 void VIS::DRIVE::Drive(int dist, float speed){
     chassis.moveToPose(0, dist, position().theta, 8000, {.maxSpeed = speed});
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::DRIVE::Drive_to_point(float X, float Y){
     chassis.moveToPoint(X, Y, ToPointTimeout);
-<<<<<<< Updated upstream
-}
-
-void VIS::DRIVE::Drive_to_point(float X, float Y, float maxspeed){
-    chassis.moveToPoint(X, Y, calcTimoutDrive(X-position().x, Y-position().y, maxspeed), {.maxSpeed = maxspeed});
-=======
     chassis.waitUntilDone();
 }
 
 void VIS::DRIVE::Drive_to_point(float X, float Y, float maxspeed){
     chassis.moveToPoint(X, Y, 9000, {.maxSpeed = maxspeed});
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::DRIVE::Drive_to_point_and_face(float X, float Y, int angle){
     chassis.moveToPose(X, Y, angle, ToPointTimeout);
-<<<<<<< Updated upstream
-}
-
-void VIS::DRIVE::Drive_to_point_and_face(float X, float Y, int angle, float maxspeed){
-    chassis.moveToPose(X, Y, angle, calcTimoutDrive(X-position().x, Y-position().y, maxspeed), {.maxSpeed = maxspeed});
-=======
     chassis.waitUntilDone();
 }
 
 void VIS::DRIVE::Drive_to_point_and_face(float X, float Y, int angle, float maxspeed){
     chassis.moveToPose(X, Y, angle, 9000, {.maxSpeed = maxspeed});
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::DRIVE::Drive_to_point_and_face(float X, float Y, float X2, float Y2){
     chassis.moveToPoint(X, Y, ToPointTimeout);
-<<<<<<< Updated upstream
-    chassis.turnToPoint(X2, Y2, ToPointTimeout);
-}
-
-void VIS::DRIVE::Drive_to_point_and_face(float X, float Y, float X2, float Y2, float DriveMaxSpeed, int TurnMaxSpeed){
-    chassis.moveToPoint(X, Y, calcTimoutDrive(X-position().x, Y-position().y, DriveMaxSpeed), {.maxSpeed = DriveMaxSpeed});
-    chassis.turnToPoint(X2, Y2, 4000, {.maxSpeed = TurnMaxSpeed});
-}
-
-//-----------------------------------------------Other functions-----------------------------------------------
-
-void VIS::DRIVE::stop(){
-    chassis.cancelMotion();
-=======
     chassis.waitUntilDone();
     chassis.turnToPoint(X2, Y2, ToPointTimeout);
     chassis.waitUntilDone();
@@ -250,22 +148,14 @@ void VIS::DRIVE::Drive_to_point_and_face(float X, float Y, float X2, float Y2, f
 void VIS::DRIVE::stop(){
     chassis.cancelMotion();
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }
 
 void VIS::DRIVE::stopall(){
     chassis.cancelAllMotions();
-<<<<<<< Updated upstream
-}
-
-void VIS::DRIVE::runodomfile(const asset file, int lookAhead){
-    chassis.follow(file, 4, 999999999);
-=======
     chassis.waitUntilDone();
 }
 
 void VIS::DRIVE::runodomfile(const asset file, int lookAhead){
     chassis.follow(file, lookAhead, 999999999);
     chassis.waitUntilDone();
->>>>>>> Stashed changes
 }

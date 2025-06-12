@@ -1,9 +1,5 @@
 #include "Visual VEX/VISUAL API.hpp"
 #include "Visual VEX\LemLib_setup.hpp"
-<<<<<<< Updated upstream
-#include "pros/misc.h"
-#include <cstdio>
-=======
 #include "liblvgl/core/lv_disp.h"
 #include "liblvgl/core/lv_event.h"
 #include "liblvgl/core/lv_obj.h"
@@ -21,7 +17,6 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
->>>>>>> Stashed changes
 
 VIS::S::AutonSelector auton_selector;
 
@@ -45,12 +40,7 @@ void VIS::Setup_Autons(){
     }, // ^^^ Blue team autons ^^^
     {{"skils test", "This is a Skils function it has no team", skils},
             {"skils test 2", "This is another Skils function you probably wont ever need another of these", skils2}
-<<<<<<< Updated upstream
-    } // ^^^ Skils autons ^^^
-    );
-=======
     }); // ^^^ Skils autons ^^^
->>>>>>> Stashed changes
 start();
 }
 
@@ -64,10 +54,7 @@ start();
     lv_color_t RedTeam = lv_color_make(255, 74, 61);
     lv_color_t BlueTeam = lv_color_make(38, 60, 255);
     lv_color_t SkilsTeam = lv_color_make(96, 222, 73);
-<<<<<<< Updated upstream
-=======
     lv_color_t Yellow = lv_color_make(255, 255, 45);
->>>>>>> Stashed changes
     //end of colors made by me
 
 
@@ -89,29 +76,6 @@ lv_obj_t *upbtn = lv_btn_create(lv_scr_act());
 lv_obj_t *dnbtn = lv_btn_create(lv_scr_act());
     lv_obj_t *nextautodn = lv_label_create(dnbtn);
 
-<<<<<<< Updated upstream
-    char upbtntext[64];
-    char dnbtntext[64];
-    char autodesctext[256];
-
-    int minbatterycap = 40;
-
-const char* setERRflags(bool control, int batterycap){
-    bool conERR = !control;
-    bool batERR = batterycap < minbatterycap;
-
-    if (batERR && conERR){
-        return "!|Controler Disconected - Low Battery|!\n";//both errors
-    } else {
-        if (batERR){
-            return "!|Low Battery|!\n";//low battery
-        } else if (conERR){
-            return "!|Controler Not Conected|!\n";//controler not conected
-        } else {
-            return "";
-        }
-    }
-=======
 //notifaction button
 lv_obj_t *notbtn = lv_btn_create(lv_scr_act());
     lv_obj_t *noticon = lv_label_create(notbtn);
@@ -180,7 +144,6 @@ const char* setERRtext(){
     }
     
     return errbuf;
->>>>>>> Stashed changes
 }
 
 void pushud(int btn){
@@ -221,9 +184,6 @@ void pushud(int btn){
         snprintf(dnbtntext, sizeof(dnbtntext), "No Auton Here");
     }
 
-<<<<<<< Updated upstream
-    snprintf(autodesctext, sizeof(autodesctext), "%sAuton Title: %s\nDesc: %s", setERRflags(controller.is_connected(), pros::c::battery_get_capacity()), AUTON[auton_page].Name, AUTON[auton_page].Desc);
-=======
     if (showNotif){
         lv_obj_clear_flag(dnbtn, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_clear_flag(upbtn, LV_OBJ_FLAG_CLICKABLE);
@@ -233,7 +193,6 @@ void pushud(int btn){
         lv_obj_add_flag(upbtn, LV_OBJ_FLAG_CLICKABLE);
         snprintf(autodesctext, sizeof(autodesctext), "Auton Title: %s\nDesc: %s", AUTON[auton_page].Name, AUTON[auton_page].Desc);
     }
->>>>>>> Stashed changes
     
     lv_label_set_text(nextautoup, upbtntext);
     lv_label_set_text(nextautodn, dnbtntext);
@@ -292,15 +251,6 @@ void upbtnhand(lv_event_t * e){
     pushud(1);//flags as an up trigger
 }
 
-<<<<<<< Updated upstream
-void start(){
-    pros::Task lvglruntime([](void) {
-        bool lastrun = false, lastrunbat = false;
-        while (true){
-            if (controller.is_connected() != lastrun){pushud(0);}
-            if ((pros::c::battery_get_capacity() < minbatterycap) != lastrunbat){pushud(0);}
-            pros::delay(20);
-=======
 void notbtnhand(lv_event_t * e){
     showNotif = !showNotif;
     pushud(0);
@@ -407,7 +357,6 @@ void start(){
 
             pushud(0);
             pros::delay(30);
->>>>>>> Stashed changes
         }
     });
 
@@ -457,14 +406,11 @@ void start(){
     //auton desc box
     lv_obj_align(AutoDesc, LV_ALIGN_CENTER, 80, 0);
     lv_obj_set_size(AutoDesc, 300, 140);
-<<<<<<< Updated upstream
-=======
     lv_obj_add_flag(AutoDesc, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(AutoDesc, LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_obj_add_flag(AutoDesc, LV_OBJ_FLAG_SCROLL_CHAIN_VER);
     lv_obj_add_flag(AutoDesc, LV_OBJ_FLAG_SCROLL_MOMENTUM);
     lv_obj_add_flag(AutoDesc, LV_OBJ_FLAG_SCROLLABLE);
->>>>>>> Stashed changes
 
     //auton up button
     lv_obj_set_size(upbtn, 280, 40);
@@ -479,8 +425,6 @@ void start(){
     lv_obj_add_event_cb(dnbtn, dnbtnhand, LV_EVENT_RELEASED, nullptr);
         lv_obj_align(nextautodn, LV_ALIGN_CENTER, 0, 0);
         lv_label_set_text(nextautodn, "Prev Auton");
-<<<<<<< Updated upstream
-=======
 
     //notifaction button
     lv_obj_align(notbtn, LV_ALIGN_RIGHT_MID, 0, 0);
@@ -490,7 +434,6 @@ void start(){
     lv_obj_set_style_bg_color(notbtn, Yellow, LV_PART_MAIN);
         lv_obj_align(noticon, LV_ALIGN_CENTER, 0, 0);
         lv_label_set_text(noticon, "!");
->>>>>>> Stashed changes
 }
 
 void VIS::S::run(){

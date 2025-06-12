@@ -2,26 +2,18 @@
 
 using namespace VIS::S;
 
-<<<<<<< Updated upstream
-=======
 //auton for auton selector data
 
->>>>>>> Stashed changes
 Auton::Auton() {
     Name = "";
     auton_call = nullptr;
     Desc = "";
 }
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 Auton::Auton(const char* name, const char* desc, std::function<void()> callback) {
     Name = name;
     auton_call = callback;
     Desc = desc;
-<<<<<<< Updated upstream
-=======
 }
 
 //controllerDC_DATA_STRUCT for holding data about controller disconects
@@ -54,5 +46,4 @@ void controllerDC_DATA_STRUCT::S_END(double T){
 
 void controllerDC_DATA_STRUCT::S_DURATION(){
     DURATION = std::abs(S_TIME - E_TIME);
->>>>>>> Stashed changes
 }
