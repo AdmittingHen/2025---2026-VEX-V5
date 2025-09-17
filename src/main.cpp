@@ -1,8 +1,6 @@
 #include "Visual VEX/LemLib_setup.hpp"
 #include "pros/misc.hpp"
 #include "pros/rtos.hpp"
-#include "pros/vision.h"
-#include "pros/vision.hpp"
 #include <cmath>
 
 #include <stdlib.h>
@@ -16,10 +14,10 @@
 
 void initialize(){
     //add autons to the selector
-    VIS::Setup_Autons();
+    VIS::Setup_Autons("1.0");
 
-    pros::Vision eye(1, pros::E_VISION_ZERO_TOPLEFT);
-
+    //eye.signature_from_utility(const std::int32_t id, const std::int32_t u_min, const std::int32_t u_max, const std::int32_t u_mean, const std::int32_t v_min, const std::int32_t v_max, const std::int32_t v_mean, const float range, const std::int32_t type);
+    
     chassis.calibrate(); // calibrate sensors
 }
 
@@ -44,6 +42,10 @@ void autonomous(){
 float activebrake_power = 0.05;
 float activebrake_curve = 8;
 
+int DeadZone = 2; // joystick deadzone
+
+int ab[2] = {0,0};
+
 lemlib::PID LeftActiveBrake(activebrake_power, 0, 0);
 lemlib::PID RightActiveBrake(activebrake_power, 0, 0);
 
@@ -54,8 +56,10 @@ void updateDrive(){
 
     // move the chassis with curvature drive
     if (abs(leftY + rightX)<2){
-        chassis.tank(pow(LeftActiveBrake.update(rightMotors.get_actual_velocity()), activebrake_curve), 
-                    pow(RightActiveBrake.update(leftMotors.get_actual_velocity()), activebrake_curve));
+        ab[0] = LeftActiveBrake.update(leftMotors.get_actual_velocity());
+        ab[1] = RightActiveBrake.update(rightMotors.get_actual_velocity());
+        chassis.tank(pow(ab[0]<0?0:ab[0], activebrake_curve), 
+                    pow(ab[1]<0?0:ab[1], activebrake_curve));
     } else {
         chassis.arcade(leftY, rightX);
     }

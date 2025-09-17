@@ -1,5 +1,7 @@
 #include "Visual VEX/VISUAL API.hpp"
 #include "Visual VEX\LemLib_setup.hpp"
+#include "liblvgl/misc/lv_area.h"
+#include "liblvgl/widgets/lv_label.h"
 #include "pros/misc.h"
 #include <cstdio>
 
@@ -13,7 +15,9 @@ VIS::S::AutonSelector auton_selector;
 //The first item is the title of the auton, it will show on the next and prev buttons as well as in the desc box
 //the second item is the desc, it is a longer string that will be shown as in the desc box only for the selected auton
 //The third item is the callback, this is the function the auton will call. You will have to go to Visual VEX/AutonFunc.hpp and add the function deff, then add the code in src/AutonCode.cpp
-void VIS::Setup_Autons(){
+const char* ver = "";
+void VIS::Setup_Autons(const char* Version){
+    ver = Version;
     auton_selector.autons_add(
     {{"red team test 1", "This is a red team auton function", drivefunc},
           {"red team test 2", "This is another red team function", drivefunc2},
@@ -44,6 +48,9 @@ start();
 
 
 //don't change code below this line you could really mess somthing up and then I have to try to fix it
+
+//Version info
+lv_obj_t *verlabel = lv_label_create(lv_scr_act());
 
 //team plate def
 lv_obj_t *btnmtx = lv_btnmatrix_create(lv_scr_act());
@@ -192,6 +199,11 @@ void start(){
     });
 
     //This function sets defulat values for objects on screen
+
+    //version label
+    char versionLabelText[64];
+    snprintf(versionLabelText, sizeof(versionLabelText), "V%s", ver);
+    lv_label_set_text(verlabel, versionLabelText);
 
     //Team selection plate creation
     //button matrix

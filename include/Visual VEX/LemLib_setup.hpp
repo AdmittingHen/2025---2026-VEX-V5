@@ -85,3 +85,5 @@ inline lemlib::Chassis chassis(drivetrain, linearController, angularController, 
 
 // pros::adi::DigitalOut piston('A'); // this is a true/false signal named piston on 3 wire port A
 // lemlib::PID name(1,0,2); // this is a pid callled name with p = 1 i = 0 d = 2
+
+inline pros::Vision eye(1, pros::E_VISION_ZERO_TOPLEFT); // Vision sensor on port 1 with top left zero point

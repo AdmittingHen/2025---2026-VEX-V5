@@ -9,7 +9,7 @@
 void start();
 
 namespace VIS{
-    void Setup_Autons();
+    void Setup_Autons(const char* version);
     lemlib::Pose position();
     int CalcTimeout(int angulardist);
     int CalcTimeout(int angulardist, int speed);
