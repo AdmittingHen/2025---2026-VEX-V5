@@ -2,7 +2,6 @@
 #include "pros/misc.hpp"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
-#include <algorithm>
 #include <cmath>
 
 #include <stdlib.h>
@@ -39,10 +38,10 @@ void autonomous(){
     VIS::S::run();//this runs the selected auton
 }
 
-float activebrake_power = 0.01;//leave this very small
+int ab[2] = {0,0};//a list for storage of active brake values for left and right
 
-lemlib::PID ActiveBrakeR(activebrake_power, 0, 0.2);
-lemlib::PID ActiveBrakeL(activebrake_power, 0, 0.2);
+lemlib::PID ActiveBrakeR(activebrakepwr, 0, 0.2);//this creates the PID for ActiveBrake
+lemlib::PID ActiveBrakeL(activebrakepwr, 0, 0.2);
 
 void updateDrive(){
     // get joystick positions
@@ -50,16 +49,22 @@ void updateDrive(){
     int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
     // move the chassis with curvature drive
-    if (abs(leftY) + abs(rightX)<2){
-        double brakeR = ActiveBrakeR.update(0-rightMotors.get_actual_velocity());
-        double brakeL = ActiveBrakeL.update(0-leftMotors.get_actual_velocity());
-        double brakepwrR = abs(rightMotors.get_actual_velocity()) > 10 ? std::max(-10.0, std::min(brakeR, 10.0)) : 0;
-        double brakepwrL = abs(leftMotors.get_actual_velocity()) > 10 ? std::max(-10.0, std::min(brakeL, 10.0)) : 0;
-        chassis.tank(brakepwrL, brakepwrR);
+    if (abs(leftY + rightX)<2){
+        ab[0] = ActiveBrakeL.update(leftMotors.get_actual_velocity());
+        ab[1] = ActiveBrakeR.update(rightMotors.get_actual_velocity());
+
+        if (curves[0]>0){
+            chassis.tank(pow(abs(ab[0])<0.05?0:ab[0], curves[0]), 
+                        pow(abs(ab[1])<0.05?0:ab[1], curves[0]));
+        } else {
+            chassis.tank(abs(ab[0])<0.05?0:ab[0], 
+                        abs(ab[1])<0.05?0:ab[1]);
+        }
+        
     } else {
-        chassis.arcade(leftY, rightX);
-        ActiveBrakeR.reset();
         ActiveBrakeL.reset();
+        ActiveBrakeR.reset();
+        chassis.arcade(curves[1]>0?pow(leftY, curves[1]):leftY, curves[2]>0?pow(rightX, curves[2]):rightX);
     }
 }
 
@@ -67,7 +72,7 @@ void updateDrive(){
  * Runs in driver control
  */
 void opcontrol(){
-    bool allowAutonTest = true;
+    bool allowAutonTest = true;//this is the master control for the testing of autons in driver control
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
     //runs the driver loop
     while (true){

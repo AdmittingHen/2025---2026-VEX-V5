@@ -243,21 +243,21 @@ namespace VIS{
 
     namespace S {
         void run();
-        class Auton {
+        class Auton {//this is a variable type for autons
             public:
              Auton();
              Auton(const char*, const char*, std::function<void()>);
-             const char* Name;
-             const char* Desc;
+             const char* Name;//name of auton
+             const char* Desc;//description of auton
              std::function<void()> auton_call;
             private:
         };
 
         class AutonSelector {
          public:
-          std::vector<Auton> RED_autons;
-          std::vector<Auton> BLUE_autons;
-          std::vector<Auton> SKILS_auton;
+          std::vector<Auton> RED_autons;//holds Red team autons with the Auton variable type
+          std::vector<Auton> BLUE_autons;//holds Blue team autons with the Auton variable type
+          std::vector<Auton> SKILS_auton;//holds Skils team autons with the Auton variable type
           int auton_page_current;
           int RED_AC, BLUE_AC, SKILS_AC;
           int SelTeam;

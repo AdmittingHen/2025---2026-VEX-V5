@@ -89,6 +89,10 @@ inline lemlib::Chassis chassis(drivetrain, linearController, angularController, 
 // pros::adi::DigitalOut piston('A'); // this is a true/false signal named piston on 3 wire port A
 // lemlib::PID name(1,0,2); // this is a pid callled name with p = 1 i = 0 d = 2
 
+inline float curves[3] = {0,0,0};
+
+inline float activebrakepwr = 0.01;
+
 inline int motorports[6] = {0, 0, 0, 0, 0, 0}; //if you make a motor add the port number here (don't include DriveTrain motors)
 //fill the list with zeros if you don't have 6 motors ex:
 //motorports[6] = {1, 2, 4, 5, 0, 0};
