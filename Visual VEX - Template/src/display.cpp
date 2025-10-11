@@ -9,12 +9,17 @@
 #include "liblvgl/misc/lv_color.h"
 #include "liblvgl/widgets/lv_btn.h"
 #include "liblvgl/widgets/lv_label.h"
+#include "pros/device.hpp"
+#include "pros/imu.hpp"
 #include "pros/misc.h"
 #include "pros/misc.hpp"
 #include "pros/motors.h"
+#include "pros/optical.hpp"
 #include "pros/rtos.hpp"
 #include <cerrno>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 
@@ -84,7 +89,7 @@ lv_obj_t *notbtn = lv_btn_create(lv_scr_act());
 
     //error flags
     bool batERR, conERR, generalERR;
-    int portstat[21];
+    const char* portstat[21];
     int conDC_NUM = -1;
     std::vector<VIS::S::controllerDC_DATA_STRUCT> conDC_DATA;
 
@@ -106,13 +111,13 @@ const char* isDT(int x, bool isfordc){
 }
 
 const char* setERRtext(){
-    static char errbuf[2048];
+    static char errbuf[6144];
 
-    snprintf(errbuf, sizeof(errbuf), "Errors: (DT is DriveTrain)\n");
+    snprintf(errbuf, sizeof(errbuf), "Errors:\n");
 
     if (batERR){
         if (pros::c::battery_get_capacity() < 15){
-            strncat(errbuf, "The Battery is dead damn it\n", sizeof(errbuf) - strlen(errbuf) - 1);
+            strncat(errbuf, "The Battery charge is low\n", sizeof(errbuf) - strlen(errbuf) - 1);
         } else {
             strncat(errbuf, "Battery Low\n", sizeof(errbuf) - strlen(errbuf) - 1);
         }
@@ -130,15 +135,12 @@ const char* setERRtext(){
             strncat(errbuf, temp, sizeof(errbuf) - strlen(errbuf) - 1);
         }
     }
-
+//adapt this for any device disconections using the ALLDATA class
     for (int x = 0; x < 21; x++){
-        if (portstat[x] == 1){
-            char temp[64];
-            snprintf(temp, sizeof(temp), "Motor %i is Disconected %s\n", x, isDT(x, true));
-            strncat(errbuf, temp, sizeof(errbuf) - strlen(errbuf) - 1);
-        } else if (portstat[x] == 2){
-            char temp[64];
-            snprintf(temp, sizeof(temp), "Motor %i is Overheating (%s%i)\n", x, isDT(x, false), int(pros::c::motor_get_temperature(x)));
+        char temp[4096];
+        strncat(temp, portstat[x], sizeof(temp) - strlen(temp) - 1);
+
+        if (x == 20){
             strncat(errbuf, temp, sizeof(errbuf) - strlen(errbuf) - 1);
         }
     }
@@ -321,19 +323,54 @@ void start(){
             }
 
             for (int x = 0; x < 21; x++){
-                if (checkx(x)){ // makes sure x is a motor port rather than an IMU or other device, bassed on motors you entered on setup
-                    if (pros::c::motor_get_actual_velocity(x) == ENODEV){
-                        portstat[x] = 1; // this sets a motor as disconected
-                    } else {
-                        if (pros::c::motor_get_temperature(x) > OT_inC){
-                            if (pros::c::motor_get_temperature(x) > 100){
-                                portstat[x] = 1; // this sets a motor as too damn hot
-                            } else {
-                                portstat[x] = 2; // this sets a motor as DC due to to high temp
-                            }
+                VIS::DeviceDataVT::VARTYPE tempdata = Data.Getdata(x);
+                char temp[64];
+                pros::DeviceType type = tempdata.G_DEVICETYPE();
+
+                if (type == pros::DeviceType::undefined){
+                    //this is here to stop the code from tring to check a port with no device
+                    continue;//jump to the next interation
+                } else if (type == pros::DeviceType::motor){
+                    pros::Motor t = std::any_cast<pros::Motor>(tempdata.G_DEVICE());
+                    if (t.get_temperature()>OT_inC){
+                        if (t.get_temperature()>100){
+                            snprintf(temp, sizeof(temp), "%s (p: %i) motor is Disabled - %iC\n", tempdata.G_NAME(), x, static_cast<int>(t.get_temperature()));
                         } else {
-                            portstat[x] = 0; // this tells me the motor is fine, this is also the flag for a port that is not included in the motor list
+                            snprintf(temp, sizeof(temp), "%s (p: %i) motor is Overheating - %iC\n", tempdata.G_NAME(), x, static_cast<int>(t.get_temperature()));
                         }
+                    } else if(t.get_actual_velocity() == ENODEV){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) motor is Disconected\n", tempdata.G_NAME(), x);
+                    }
+
+                } else if (type == pros::DeviceType::distance){
+                    pros::Distance t = std::any_cast<pros::Distance>(tempdata.G_DEVICE());
+                    if (!t.is_installed()){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) distance is disconected\n", tempdata.G_NAME(), x);
+                    }
+
+                } else if (type == pros::DeviceType::imu){
+                    pros::Imu t = std::any_cast<pros::Imu>(tempdata.G_DEVICE());
+                    if (!t.is_installed()){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) IMU is disconected\n", tempdata.G_NAME(), x);
+                    } else if (t.get_status() == pros::ImuStatus::calibrating){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) IMU is calibrating\n", tempdata.G_NAME(), x);
+                    } else if (t.get_status() == pros::ImuStatus::error){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) IMU has an error\n", tempdata.G_NAME(), x);
+                    }
+                } else if (type == pros::DeviceType::optical){
+                    pros::Optical t = std::any_cast<pros::Optical>(tempdata.G_DEVICE());
+                    if (!t.is_installed()){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) Optical sensor is disconected\n", tempdata.G_NAME(), x);
+                    }
+                } else if (type == pros::DeviceType::rotation){
+                    pros::Rotation t = std::any_cast<pros::Rotation>(tempdata.G_DEVICE());
+                    if (!t.is_installed()){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) Rotation sensor is disconected\n", tempdata.G_NAME(), x);
+                    }
+                } else if (type == pros::DeviceType::vision){
+                    pros::Vision t = std::any_cast<pros::Vision>(tempdata.G_DEVICE());
+                    if (!t.is_installed()){
+                        snprintf(temp, sizeof(temp), "%s (p: %i) Vision sensor is disconected\n", tempdata.G_NAME(), x);
                     }
                 }
             }

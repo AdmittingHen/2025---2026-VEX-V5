@@ -1,8 +1,15 @@
 #include "lemlib/asset.hpp"
 #include "lemlib/pose.hpp"
 #include "AutonFunc.hpp"
+#include "liblvgl/extra/lv_extra.h"
 #include "main.h" // IWYU pragma: keep
+#include "pros/device.hpp"
+#include "pros/motor_group.hpp"
+#include "pros/motors.hpp"
+#include <algorithm>
 #include <cstdio>
+#include <functional>
+#include "any"
 
 #pragma once
 
@@ -17,6 +24,47 @@ namespace VIS{
         waitfor will wait for the current funciton to reach a coresponding value
         (inches, degrees, etc)
     */
+
+    namespace DeviceDataVT{
+        class VARTYPE{
+            public:
+                VARTYPE(const char*, int, std::any, pros::DeviceType);
+                const char* G_NAME();
+                int G_PORT();
+                std::any G_DEVICE();
+                pros::DeviceType G_DEVICETYPE();
+            private:
+                const char* NAME;
+                int PORT;
+                std::any DEVICE;
+                pros::DeviceType DEVICETYPE;
+        };
+
+        class AllData{
+            public:
+                AllData();
+                void AddDevice(VARTYPE newdevice);
+                VARTYPE Getdata(int port);
+                std::vector<VARTYPE> GetSpecDevice(pros::DeviceType);
+            private:
+                std::vector<VARTYPE> DEVICES;
+                VARTYPE empty = VARTYPE("",-1,nullptr, pros::DeviceType::undefined);
+        };
+    }
+
+    namespace MatchREC{
+        namespace DataDump{
+
+        }
+
+        namespace FileMan{
+
+        }
+
+        namespace DumpToRead{
+
+        }
+    }
     
     namespace DRIVE{
         void Drive(int dist, float speed);

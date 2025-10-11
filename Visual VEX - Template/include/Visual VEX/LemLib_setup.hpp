@@ -3,6 +3,8 @@
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/chassis/trackingWheel.hpp"
 #include "lemlib/pid.hpp"
+#include "pros/device.hpp"
+#include "DriveControl.hpp"
 
 #pragma once
 
@@ -92,6 +94,10 @@ inline lemlib::Chassis chassis(drivetrain, linearController, angularController, 
 inline float curves[3] = {0,0,0};
 
 inline float activebrakepwr = 0.01;
+
+inline VIS::DeviceDataVT::AllData Data;
+
+inline VIS::MASTER::Control::PID test(1,0,0);
 
 inline int motorports[6] = {0, 0, 0, 0, 0, 0}; //if you make a motor add the port number here (don't include DriveTrain motors)
 //fill the list with zeros if you don't have 6 motors ex:
